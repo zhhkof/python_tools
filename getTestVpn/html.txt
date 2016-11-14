@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>我要测试 - 飞讯VPN</title>
+<base href="http://www.feixunwangluo.com/" />
+<meta name="keywords" content="我要测试" />
+<meta name="description" content="我要测试" />
+<meta http-equiv="x-ua-compatible" content="IE=edge,chrome=1" />
+<script type="text/javascript">var _SYS_basepath="http://www.feixunwangluo.com";var _SYS_memberid="0";</script>
+<link rel="shortcut icon" href="http://s1.513vw.com/favicon.ico" type="image/x-icon" />
+<link href="http://s1.513vw.com/template/vpn/css-global,member,onlinecs,style_ss_feixun-1010.css" rel="stylesheet" type="text/css" />
+<link href="http://s1.513vw.com/images/css-common-1010.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="http://s1.513vw.com/js-jquery,util,dropmenu,banner,search,header,popwin,jquerytab-1010.js"></script>
+</head>
+<body>
+<div class="header1">
+	<div class="header1in">
+		<div id="memberlognav"><div id="loginstr"><a href="index.php?m=signup">注册</a>-<a href="index.php?m=login">登陆</a>|<a href="index.php?m=member" class="topmem">我的控制台<img src="images/ico_new.png" /></a>-<a href="index.php?m=member&action=tickets">问哈</a></div></div>		
+	</div>
+</div>
+<div class="header2">
+	<div id="header_top">
+		<div id="logodiv"><a href="index.html" class="logo"><img src="http://s1.513vw.com/uploadfile/attachment/201512/1450019769_5094_2439.gif" alt="飞讯VPN" /></a></div>
+		<div id="topnav_inner"><ul id="topnav">
+<li class="topmenu homeli"><a class="toplink" href="/" title="首页"><span>首页</span></a></li>
+<li class='topmenu'><a class='toplink' href='/ssclient/'><span>客户端</span></a><div class='sub'><ul><li><a href="/index.php?m=ss&action=business">企业独立专线</a></li></ul></div></li><li class='spr'></li><li class='topmenu'><a class='toplink' href='/index.php?m=ss&action=business'><span>企业专线</span></a></li><li class='spr'></li><li class='topmenu'><a class='toplink' href='page/testss.html'><span>我要测试</span></a></li><li class='spr'></li><li class='topmenu'><a class='toplink' href='/page/guide.html'><span>如何开通</span></a></li><li class='spr'></li><li class='topmenu cur'><a class='toplink' href='/help/ss/'><span>帮助文档</span></a></li><li class='spr'></li></ul></div>
+	</div>
+</div><div class="secban"><div class="secban_inner"><img src="http://s1.513vw.com/template/vpn/images/shadowsocks/secban.png" /></div></div>
+<div class="tplmain">
+<div class="position"><span>您的位置:</span> <a href="index.html">飞讯VPN</a>  » <a href=page/testss.html>我要测试</a></div>
+<table class="main_table">
+	<tr>
+		<td class="lefttd">
+<div class="leftcate">
+	<h2>网站导航</h2>
+	<div class="lfmenu"><div class='bigmenu'><a href="/ssclient/">客户端</a></div><div class='bigmenu'><a href="/index.php?m=ss&action=business">企业专线</a></div><div class='bigmenu cur'><a href="page/testss.html">我要测试</a></div><div class='bigmenu'><a href="/page/guide.html">如何开通</a></div><div class='bigmenu'><a href="/help/ss/">帮助文档</a></div><div class="last"></div></div>
+</div>
+<div class="clear" style='height:20px'></div>
+		</td>
+		<td class="righttd">
+<div class="pagect">		
+<div class="h1title">我要测试</div>
+<span class="corner-tl"></span><span class="corner-tr"></span><span class="corner-bl"></span><span class="corner-br"></span>		
+<div class="pagecontent"><br />
+<span style="font-size:16px;"><strong>1、SS测试帐号</strong></span><br />
+以下是测试帐号（测试帐号会不定时自动修改密码）：<br />
+测试帐号仅供测试使用，需要稳定快速的SS帐号，请正式购买。
+<div style="clear:both;height:10px;">
+</div>
+<div class='testvpnitem'>
+	<b>测试节点：美国VL-26</b><br />
+	服务器IP：<span>45.63.51.232</span><br />
+	端口：8752<br />
+	密码：694659<br />
+	加密方式：<span>aes-256-cfb</span>
+</div><div class='testvpnitem'>
+	<b>测试节点：新加坡DS-01★</b><br />
+	服务器IP：<span>128.199.152.138</span><br />
+	端口：8139<br />
+	密码：272596<br />
+	加密方式：<span>aes-256-cfb</span>
+</div>
+<div style="clear:both;height:10px;">
+</div>
+<br />
+<span style="font-size:16px;"><strong>2、SS客户端下载/设置教程</strong></span><br />
+SS客户端下载/设置教程，请点击这里： <span style="white-space:nowrap;"><a href="http://www.feixunwangluo.com/ssclient/" target="_blank"><u>http://www.feixunwangluo.com/ssclient/</u></a></span><br />
+<br />
+<span style="font-size:16px;"><strong>3、如何开通购买</strong></span><br />
+如果不清楚如何购买，请查看购买流程： <span style="white-space:nowrap;"><a href="http://www.feixunwangluo.com/page/guide.html" target="_blank"><u>http://www.feixunwangluo.com/page/guide.html</u></a></span><br />
+<br />
+购买之后如果需要退款，请先了解退款协议： <span style="white-space:nowrap;"><a href="http://www.feixunwangluo.com/page/refund.html" target="_blank"><u>http://www.feixunwangluo.com/page/refund.html</u></a></span><br /></div>
+</div>		
+		</td>
+	</tr>
+</table>
+</div>
+<div class="footer_out">
+	<div class="footer_inner">
+		<div class="f2">
+<a href="/page/guide.html"><span class="c">如何购买</span></a> |
+<a href="/page/refund.html"><span class="c">退款协议</span></a> |
+<a href="/page/terms.html"><span class="c">服务条款</span></a> |
+<a href="/?ver=m"><span class="c" style="color:#f90;font-weight:bold;">移动版</span></a>
+		</div>
+		<div id="footertel"></div>
+		<div class="footercontent">
+Powered by&nbsp;<a href="http://www.feixunwangluo.com/" target="_blank">飞讯加速</a>&nbsp;© 2008-2017 飞讯官网&nbsp;<a href="http://www.miibeian.gov.cn/" target="_blank">皖ICP备13010886号-1</a>
+<br />
+严正声明：本网站仅提供网络加速技术服务，严禁从事任何违反中华人民共和国以及服务器所在地法律法规的行为！
+		</div>
+		<div id="debuginfo">Total 0.005678(s) query 3</div>
+	</div>
+</div>
+<div style="height:0px; overflow:hidden;"><script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1258134384'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1258134384' type='text/javascript'%3E%3C/script%3E"));</script></div>
+<script>
+$(document).ready(function(){ $("#topnav .topmenu").dropmenu();});
+</script>
+<script>
+(function(){
+    var bp = document.createElement('script');
+    bp.src = '//push.zhanzhang.baidu.com/push.js';
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+</body>
+</html>
