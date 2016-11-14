@@ -60,5 +60,5 @@ class Excel:
             # print(ws['A:C'])
 
 
-e = Excel('information.xlsx')
-print(e.get_datadict_by_proid('1178','proinfo'))
+# e = Excel('information.xlsx')
+# print(e.get_datadict_by_proid('1178','proinfo'))
