@@ -10,36 +10,6 @@ import time
 from frontSimulator.multicastSender import sender
 from frontSimulator.xlsxTool import Excel
 
-wmanlist1178 = ('2016-11-10 14:45:08.013', '37.00', 'WTG20', '115/2000', 'Simulator', '150702', '2222_XiaoMing',
-                '192.168.137.1.1.1', 'GW_V_GL', '2015-07-02 00:00:00.000', 'SW66.6_V20150702', '20065', '', '16',
-                '2016', '11', '10', '14', '45', '7', '2', '600', '0', '37', '34', '28', '65', '39', '43', '26', '38',
-                '0', '0', '0', '0', '0', '0', '0.00', '0.00', '0.00', '0', '0', '0', '0', '0', '0', '0', '0', '0', '',
-                '', '', '', '', '', '0', '0', '0', '0', '5', '2', '7', '3', '2060', '6', '0', '0', '0', '6', '7', '2',
-                '1', '2', '0', '3', '20071', '6', '103.60', '10.36', '16.22', '0.00', '0.00', '8.84', '77.03', '2.62',
-                '0.00', '0.00', '0.00', '20.16', '8.84', '23.95', '79.65', '2.50', '65.70', '63.20', '0.00',
-                '-1801801.00', '0.00', '0.01', '0.01', '0.01', '3.00', '0.00', '275.94', '275.94', '275.94', '60.00',
-                '-0.50', '-0.50', '0.49', '0.00', '55.00', '50.00', '36.00', '44.00', '52.00', '53.00', '275.94',
-                '0.00', '0.00', '527582877.92', '682.00', '693.00', '692.00', '0.02', '0.02', '693.00', '0.00', '49.00',
-                '-414.00', '0.88', '45.00', '35.00', '26.00', '34.00', '67.00', '36.00', '25.00', '44.00', '40.00',
-                '37.00', '51.00', '58.00', '56.00', '40.00', '65.00', '40.00', '62.00', '42.00', '60.00', '699.00',
-                '693.00', '690.00', '387.00', '399.00', '388.00', '63.70', '-538.20', '1.14', '0.00', '0.00', '0.00',
-                '0.00', '0.00', '0.00', '0.00', '0.00', '0.00', '109.56', '16.35', '16.21', '29.94', '14.84',
-                '20071.00', '138.00', '0.00', '0.00', '29.00', '0.00', '0.00', '0.00', '0.00', '681.00', '0.00',
-                '62.00', '41.00', '125.00', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'true', 'true', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'true', '125.00', '172.99', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
-                '', '', '', '', '', '', 'true', 'true', 'false', 'false', 'false', 'false', 'false', 'false', 'false',
-                'false', 'false', 'true', 'false', 'false', 'false', 'false', 'false', 'false', '0.00', '0.00', '0.00',
-                '0.00', '0.00', '0.00', '0.00', 'false', '', '', '', '', '', '', '', '0', '0', 'UnLock', 'False', '0',
-                '0.00', '0', '1', '', '0')
-
 
 class Application:
     def __init__(self, root):
@@ -102,7 +72,7 @@ class Application:
              stop_mode.get()]))
         self.bt1.pack(side='left')
 
-        tk.Label(win1, text='-----------------------' * 10).pack(side='left')
+        tk.Label(win1, text='-----------------------' * 6).pack(side='left')
 
         self.times = tk.StringVar(self.root, '2')
         tk.Label(win2, text='  批量次数： ').pack(side='left')
@@ -141,14 +111,17 @@ class Application:
             self.set_bt_normal()
 
     def send_one(self, data=[]):
-        self.set_bt_disabled()
+        self.xlsx.loadxlsx()
+        seatDict = self.xlsx.get_sNdict_from_sheet()
+        wmanModDict = self.xlsx.get_wmanModDict_from_sheet()
         try:
-            for msg in generate_message(data, self.xlsx):
-                sender('10.80.6.57', 1501, '224.1.1.10', 4001, msg)
+            self.set_bt_disabled()
+            for msg in generate_message(data, seatDict, wmanModDict):
+                sender('0.0.0.0', 1501, '224.1.1.10', 4001, msg)
                 self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                 self.txt0.update()
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
-                                      :-3] + ": " + "-----finish-----" + "\n\r")
+                                  :-3] + ": " + "-----finish-----" + "\n\r")
         except Exception as e:
             print(e)
         finally:
@@ -174,6 +147,8 @@ def getValueList():
 def messages_from_xlsx(xlsx):
     xlsx.loadxlsx()
     datalist = xlsx.get_datalist_from_sheet('info')
+    seatDict = xlsx.get_sNdict_from_sheet()
+    wmanModDict = xlsx.get_wmanModDict_from_sheet()
     msgs = []
     for data in datalist:
         # msg = []
@@ -201,18 +176,18 @@ def messages_from_xlsx(xlsx):
         #     msg.append(alarmdata)
         # msg.append('(wman|%s|' % wtid + ','.join(wmanlist))
 
-        msgs.append(generate_message(data, xlsx))
+        msgs.append(generate_message(data, seatDict, wmanModDict))
     return msgs
 
 
-def generate_message(data, xlsx):
-    xlsx.loadxlsx()
+def generate_message(data, seatDict, wmanModDict):
+    # xlsx.loadxlsx()
     msg = []
-    wmanlist = list(wmanlist1178)
-    wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    print(data)
     wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word = data
-    seatNum = xlsx.get_sNdict_by_proid().get(proid)
+    seatNum = seatDict.get(proid)
+    # wmanlist = list(wmanlist1178)
+    wmanlist = wmanModDict.get(proid)
+    wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     wmanlist[seatNum[0] - 1] = wtstate
     statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
 
