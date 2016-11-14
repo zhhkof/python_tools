@@ -23,11 +23,13 @@ def sender(SENDERIP, SENDERPORT, MYGROUP, MYPORT, SENDDATA='testdata'):
                           IP_ADD_MEMBERSHIP,
                           inet_aton(MYGROUP) + inet_aton(SENDERIP))  # 加入组播组
     # for i in range(times):
-        # data = (time.strftime('%Y-%m-%d %H:%M:%S') + ': multicast test data.').encode('utf-8')  # socket发送需转成byte字节。
+    # data = (time.strftime('%Y-%m-%d %H:%M:%S') + ': multicast test data.').encode('utf-8')  # socket发送需转成byte字节。
     s.sendto(SENDDATA.encode('utf-8'), (MYGROUP, MYPORT))
-        # print(str(i) + ":" + SENDDATA)
+    # print(str(i) + ":" + SENDDATA)
     print("send data ok !")
-        # time.sleep(1)
+    # time.sleep(1)
+
 
 # if __name__ == "__main__":
 #     sender('10.80.6.57',1501,'224.1.1.15',4001)
+
