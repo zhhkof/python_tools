@@ -2,7 +2,6 @@ from openpyxl import load_workbook
 
 
 class Excel:
-
     def __init__(self, path='information.xlsx'):
         self.path = path
 
@@ -11,8 +10,6 @@ class Excel:
             self.wb = load_workbook(self.path)
         except Exception as e:
             print(e)
-
-
 
     def get_wmanModDict_from_sheet(self, sheet_name='propaths'):
         ws = self.wb.get_sheet_by_name(sheet_name)
@@ -25,10 +22,29 @@ class Excel:
                 for cell in columnsObj[i]:
                     # print(cell.value)
                     if cell.value is None:
-                        cell.value=''
+                        cell.value = ''
                     column_value.append(cell.value)
-                del(column_value[0])
+                del (column_value[0])
                 all_value[pid] = column_value
+        return all_value
+
+    def get_datalist_from_sheet2(self, sheet_name='info'):
+        ws = self.wb.get_sheet_by_name(sheet_name)
+        rowsObj = tuple(ws.rows)
+        all_value = []
+        keys = [x.value for x in rowsObj[0]]
+        print(keys)
+        if len(rowsObj) >= 2:
+            for i in range(1, len(rowsObj)):
+                # print(rowdata[i])
+                row_value = {}
+                for j in range(len(rowsObj[i])):
+                    if rowsObj[i][0].value is None:
+                        break
+                    # print(cell.value)
+                    row_value[keys[j]] = str(rowsObj[i][j].value)
+                # if len(row_value) > 0:
+                all_value.append(row_value)
         return all_value
 
     def get_datalist_from_sheet(self, sheet_name='info'):
@@ -58,7 +74,7 @@ class Excel:
                 pid = str(rowsObj[i][0].value)
                 for cell in rowsObj[i]:
                     row_value.append(int(cell.value))
-                del(row_value[0])
+                del (row_value[0])
                 all_value[pid] = row_value
             return all_value
 
@@ -69,7 +85,7 @@ class Excel:
 # print(ws['A1:C2'])
 # print(ws['A:C'])
 
-
-e = Excel('information.xlsx')
-e.loadxlsx()
-print(e.get_wmanModDict_from_sheet())
+if __name__ == '__main__':
+    e = Excel('information.xlsx')
+    e.loadxlsx()
+    print(e.get_datalist_from_sheet2())
