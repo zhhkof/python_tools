@@ -33,7 +33,6 @@ class Excel:
         rowsObj = tuple(ws.rows)
         all_value = []
         keys = [x.value for x in rowsObj[0]]
-        print(keys)
         if len(rowsObj) >= 2:
             for i in range(1, len(rowsObj)):
                 # print(rowdata[i])
@@ -64,7 +63,7 @@ class Excel:
                     all_value.append(row_value)
         return all_value
 
-    def get_sNdict_from_sheet(self, sheet_name='proinfo'):
+    def get_sNdict_from_sheet(self, sheet_name='proSeatNum'):
         ws = self.wb.get_sheet_by_name(sheet_name)
         rowsObj = tuple(ws.rows)
         if len(rowsObj) >= 2:
@@ -85,7 +84,7 @@ class Excel:
 # print(ws['A1:C2'])
 # print(ws['A:C'])
 
-if __name__ == '__main__':
-    e = Excel('information.xlsx')
-    e.loadxlsx()
-    print(e.get_datalist_from_sheet2())
+# if __name__ == '__main__':
+#     e = Excel('information.xlsx')
+#     e.loadxlsx()
+#     print(e.get_datalist_from_sheet2())
