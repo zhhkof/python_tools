@@ -48,20 +48,6 @@ class Excel:
                     all_value.append(row_value)
         return all_value
 
-    # def get_sNdict_from_sheet(self,sheet_name='proinfo'):
-    #     ws = self.wb.get_sheet_by_name(sheet_name)
-    #     rowsObj=tuple(ws.rows)
-    #     all_value=[]
-    #     if len(rowsObj) >=2:
-    #         for i in range(1,len(rowsObj)):
-    #             row_value={}
-    #             for cell in rowsObj[i]:
-    #                 if rowsObj[i][0].value is None:
-    #                     break
-    #                 row_
-
-
-
     def get_sNdict_from_sheet(self, sheet_name='proinfo'):
         ws = self.wb.get_sheet_by_name(sheet_name)
         rowsObj = tuple(ws.rows)
@@ -84,6 +70,6 @@ class Excel:
 # print(ws['A:C'])
 
 
-# e = Excel('information.xlsx')
-# e.loadxlsx()
-# print(e.get_wmanModDict_from_sheet())
+e = Excel('information.xlsx')
+e.loadxlsx()
+print(e.get_wmanModDict_from_sheet())
