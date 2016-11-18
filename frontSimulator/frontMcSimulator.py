@@ -19,11 +19,23 @@ class Application:
         self.xlsx = Excel()
 
     def create_frame_bottom(self):
+
         self.txt0 = tk.Text(self.root, width=160, height=30, border=5)
         self.txt0.pack(side='top')
         self.sl0 = tk.Scrollbar(self.root)
         self.sl0.config(command=self.txt0.yview)
         self.txt0.config(yscrollcommand=self.sl0.set)
+
+        winMC=tk.Frame(self.root, border=4)
+        winMC.pack(side='top', anchor='w')
+
+        self.mcgroupid = tk.StringVar(self.root,'224.1.1.10')
+        tk.Label(winMC, text='  组播ip： ').pack(side='left')
+        tk.Entry(winMC, width='12', textvariable=self.mcgroupid).pack(side='left')
+
+        self.mcport = tk.StringVar(self.root,'4001')
+        tk.Label(winMC, text='  组播端口： ').pack(side='left')
+        tk.Entry(winMC, width='12', textvariable=self.mcport).pack(side='left')
 
         win0 = tk.Frame(self.root, border=4)
         win0.pack(side='top', anchor='w')
@@ -98,7 +110,7 @@ class Application:
                         self.stopflag = 0
                         break
                     for msg in msgs:
-                        sender('0.0.0.0', 1501, '224.1.1.10', 4001, msg)
+                        sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
                         self.txt0.insert(1.0,
                                          datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                         self.txt0.update()
@@ -117,7 +129,7 @@ class Application:
         try:
             self.set_bt_disabled()
             for msg in generate_message(data, seatDict, wmanModDict):
-                sender('0.0.0.0', 1501, '224.1.1.10', 4001, msg)
+                sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
                 self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                 self.txt0.update()
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
