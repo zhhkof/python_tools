@@ -6,7 +6,7 @@ from tkinter import filedialog
 import tkinter as tk
 import tkinter.messagebox as messagebox
 import time
-
+import hashlib
 from frontSimulator.multicastSender import sender
 from frontSimulator.xlsxTool import Excel
 
@@ -205,7 +205,7 @@ def messages_from_xlsx2(xlsx):
     msgs = []
     for datadict in datalist2:
         msgs.append(generate_message2(datadict, seatDict, wmanModDict))
-    print(msgs)
+    # print(msgs)
     return msgs
 
 
@@ -234,7 +234,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
             wmanlist[seatNum[5] - 1] = stop_mode
         if error_code != '0':
             wmanlist[seatNum[1] - 1] = error_code
-            falutdata = '(falutdata|%s|%s| |2|443c860a-9fe6-4916-9a30-0ecad3821ea2)' % (wtid, error_code)
+            falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code))
             msg.append(falutdata)
         if alarm_code != '0':
             wmanlist[seatNum[2] - 1] = alarm_code
@@ -264,7 +264,7 @@ def generate_message(data, seatDict, wmanModDict):
         wmanlist[seatNum[5] - 1] = stop_mode_word
     if error_code != '0':
         wmanlist[seatNum[1] - 1] = error_code
-        falutdata = '(falutdata|%s|%s| |2|443c860a-9fe6-4916-9a30-0ecad3821ea2)' % (wtid, error_code)
+        falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code))
         msg.append(falutdata)
     if alarm_code != '0':
         wmanlist[seatNum[2] - 1] = alarm_code
@@ -272,6 +272,16 @@ def generate_message(data, seatDict, wmanModDict):
         msg.append(alarmdata)
     msg.append('(wman|%s|' % wtid + ','.join(wmanlist))
     return msg
+
+
+def generate_unique_code(text):
+    m = hashlib.md5()
+    m.update(text.encode('utf-8'))
+    l = list(m.hexdigest())
+    l[7] = l[7] + '-'
+    l[11] = l[11] + '-'
+    l[15] = l[15] + '-'
+    return ''.join(l)
 
 
 root = tk.Tk()
