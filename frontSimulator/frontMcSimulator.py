@@ -278,9 +278,9 @@ def generate_unique_code(text):
     m = hashlib.md5()
     m.update(text.encode('utf-8'))
     l = list(m.hexdigest())
-    l[7] = l[7] + '-'
-    l[11] = l[11] + '-'
-    l[15] = l[15] + '-'
+    l[7] += '-'
+    l[11] += '-'
+    l[15] += '-'
     return ''.join(l)
 
 
