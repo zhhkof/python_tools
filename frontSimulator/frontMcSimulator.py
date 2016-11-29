@@ -9,6 +9,7 @@ import time
 import hashlib
 from frontSimulator.multicastSender import sender
 from frontSimulator.xlsxTool import Excel
+import threading
 
 
 class Application:
@@ -34,10 +35,10 @@ class Application:
 
         winMC = tk.Frame(self.root, border=4)
         winMC.pack(side='top', anchor='w')
-        self.mcgroupid = tk.StringVar(self.root, '224.1.1.10')
+        self.mcgroupid = tk.StringVar(self.root, '224.1.1.15')
         tk.Label(winMC, text='  组播ip： ').pack(side='left')
         tk.Entry(winMC, width='12', textvariable=self.mcgroupid).pack(side='left')
-        self.mcport = tk.StringVar(self.root, '4001')
+        self.mcport = tk.StringVar(self.root, '8769')
         tk.Label(winMC, text='  组播端口： ').pack(side='left')
         tk.Entry(winMC, width='12', textvariable=self.mcport).pack(side='left')
         self.diyMCmsg = tk.StringVar(self.root)
@@ -97,14 +98,16 @@ class Application:
 
         self.times = tk.StringVar(self.root, '1')
         tk.Label(win2, text='  批量次数： ').pack(side='left')
-        tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
+        ttk.Combobox(win2, values=[1,5,10,20,30,40], textvariable=self.times, width='4').pack(side='left')
+        # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
 
         self.sleepTime = tk.StringVar(self.root, '0')
         tk.Label(win2, text='  间隔时间(s)： ').pack(side='left')
         tk.Entry(win2, width='4', textvariable=self.sleepTime).pack(side='left')
 
         self.bt2 = tk.Button(win2, text='批量组播', padx=8,
-                             command=lambda: self.send_from_xlsx(self.times.get(), self.sleepTime.get()))
+                             command=lambda: do_with_thread(
+                                 self.send_from_xlsx(self.times.get(), self.sleepTime.get())))
         self.bt2.pack(side='left')
 
         self.bt3 = tk.Button(win2, text='Stop', padx=8, command=self.stopSend)
@@ -116,21 +119,25 @@ class Application:
         self.set_bt_disabled()
         try:
             for i in range(int(num)):
+                if self.stopflag == 1:
+                    break
                 for msgs in messages_from_xlsx2(self.xlsx):
                     if self.stopflag == 1:
-                        self.stopflag = 0
                         break
                     for msg in msgs:
+                        if self.stopflag == 1:
+                            break
                         sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
                         self.txt0.insert(1.0,
                                          datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                         self.txt0.update()
                         time.sleep(int(sleepTime))
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
-                                  :-3] + ": " + "-----finish-----" + "\n\r")
+                                  :-3] + ": " + "-----finish-----" + "\n")
         except Exception as e:
             print(e)
         finally:
+            self.stopflag = 0
             self.set_bt_normal()
 
     def send_one(self, data=[]):
@@ -179,24 +186,6 @@ class Application:
     def clearText(self):
         self.txt0.delete(0.0, END)
 
-
-def getValueList():
-    args = [1, 2, 3]
-    return args
-
-
-def messages_from_xlsx(xlsx):
-    xlsx.loadxlsx()
-    datalist = xlsx.get_datalist_from_sheet()
-    datalist2 = xlsx.get_datalist_from_sheet2()
-    seatDict = xlsx.get_sNdict_from_sheet()
-    wmanModDict = xlsx.get_wmanModDict_from_sheet()
-    msgs = []
-    for data in datalist:
-        msgs.append(generate_message(data, seatDict, wmanModDict))
-    return msgs
-
-
 def messages_from_xlsx2(xlsx):
     xlsx.loadxlsx()
     datalist2 = xlsx.get_datalist_from_sheet2()
@@ -206,21 +195,23 @@ def messages_from_xlsx2(xlsx):
     for datadict in datalist2:
         msgs.append(generate_message2(datadict, seatDict, wmanModDict))
     # print(msgs)
+    # print(msgs)
     return msgs
-
 
 def generate_message2(datadict, seatDict, wmanModDict):
     # xlsx.loadxlsx()
     msg = []
     for key in datadict:
         exec(key + "='" + datadict.get(key) + "'", globals())
+        # print(key+":"+datadict.get(key))
     if connect_code != '0':
         comstate = "(comstate|%s|%s)" % (wtid, connect_code)
         msg.append(comstate)
     else:
         seatNum = seatDict.get(proid)
         # wmanlist = list(wmanlist1178)
-        wmanlist = wmanModDict.get(proid)
+        wmanlist = list(wmanModDict.get(proid)) #一定要加list(),否则不是新对象，会导致后面循环采用前面的list。
+        # print(wmanlist)
         wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         wmanlist[seatNum[0] - 1] = wtstate
         statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
@@ -244,10 +235,37 @@ def generate_message2(datadict, seatDict, wmanModDict):
     return msg
 
 
+def do_with_thread(func):
+    t1 = threading.Thread(target=func)
+    t1.setDaemon(True)
+    t1.start()
+
+
+def getValueList():
+    args = [1, 2, 3]
+    return args
+
+
+def messages_from_xlsx(xlsx):
+    xlsx.loadxlsx()
+    datalist = xlsx.get_datalist_from_sheet()
+    datalist2 = xlsx.get_datalist_from_sheet2()
+    seatDict = xlsx.get_sNdict_from_sheet()
+    wmanModDict = xlsx.get_wmanModDict_from_sheet()
+    msgs = []
+    for data in datalist:
+        msgs.append(generate_message(data, seatDict, wmanModDict))
+    return msgs
+
+
 def generate_message(data, seatDict, wmanModDict):
     # xlsx.loadxlsx()
     msg = []
-    wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word = data
+    wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word,connect_code = data
+    if connect_code != '0':
+        comstate = "(comstate|%s|%s)" % (wtid, connect_code)
+        msg.append(comstate)
+        return msg
     seatNum = seatDict.get(proid)
     # wmanlist = list(wmanlist1178)
     wmanlist = wmanModDict.get(proid)
