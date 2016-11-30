@@ -268,7 +268,7 @@ def generate_message(data, seatDict, wmanModDict):
         return msg
     seatNum = seatDict.get(proid)
     # wmanlist = list(wmanlist1178)
-    wmanlist = wmanModDict.get(proid)
+    wmanlist = list(wmanModDict.get(proid))
     wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     wmanlist[seatNum[0] - 1] = wtstate
     statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
