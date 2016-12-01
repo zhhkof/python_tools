@@ -56,7 +56,7 @@ class Application:
 
         wtid = tk.StringVar(self.root)
         tk.Label(win0, text='  风机id： ').pack(side='left')
-        # self.wtid = ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
+        # ttk.Combobox(win0, textvariable=wtid,values=getValueList(), width='12').pack(side='left')
         tk.Entry(win0, width='12', textvariable=wtid).pack(side='left')
 
         protocolid = tk.StringVar(self.root, "1178")
@@ -90,15 +90,16 @@ class Application:
         tk.Entry(win0, width='6', textvariable=stop_mode).pack(side='left')
 
         self.bt1 = tk.Button(win0, text='单机单次组播', padx=8, command=lambda: self.send_one(
-            [wtid.get(), protocolid.get(), wtstate.get(), error_code.get(), alarm_code.get(), power_mode.get(),
-             stop_mode.get()]))
+            {"wtid": wtid.get(), "proid": protocolid.get(), "wtstate": wtstate.get(), "error_code": error_code.get(),
+             "alarm_code": alarm_code.get(), "power_mode": power_mode.get(),
+             "stop_mode": stop_mode.get(), "connect_code": "0"}))
         self.bt1.pack(side='left')
 
         tk.Label(win1, text='-----------------------' * 6).pack(side='left')
 
         self.times = tk.StringVar(self.root, '1')
         tk.Label(win2, text='  批量次数： ').pack(side='left')
-        ttk.Combobox(win2, values=[1,5,10,20,30,40], textvariable=self.times, width='4').pack(side='left')
+        ttk.Combobox(win2, values=[1, 5, 10, 20, 30, 40], textvariable=self.times, width='4').pack(side='left')
         # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
 
         self.sleepTime = tk.StringVar(self.root, '0')
@@ -140,13 +141,13 @@ class Application:
             self.stopflag = 0
             self.set_bt_normal()
 
-    def send_one(self, data=[]):
+    def send_one(self, dataDict={}):
         self.xlsx.loadxlsx()
         seatDict = self.xlsx.get_sNdict_from_sheet()
         wmanModDict = self.xlsx.get_wmanModDict_from_sheet()
         try:
             self.set_bt_disabled()
-            for msg in generate_message(data, seatDict, wmanModDict):
+            for msg in generate_message2(dataDict, seatDict, wmanModDict):
                 sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
                 self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                 self.txt0.update()
@@ -186,6 +187,7 @@ class Application:
     def clearText(self):
         self.txt0.delete(0.0, END)
 
+
 def messages_from_xlsx2(xlsx):
     xlsx.loadxlsx()
     datalist2 = xlsx.get_datalist_from_sheet2()
@@ -198,6 +200,7 @@ def messages_from_xlsx2(xlsx):
     # print(msgs)
     return msgs
 
+
 def generate_message2(datadict, seatDict, wmanModDict):
     # xlsx.loadxlsx()
     msg = []
@@ -209,8 +212,9 @@ def generate_message2(datadict, seatDict, wmanModDict):
         msg.append(comstate)
     else:
         seatNum = seatDict.get(proid)
+        print("ok")
         # wmanlist = list(wmanlist1178)
-        wmanlist = list(wmanModDict.get(proid)) #一定要加list(),否则不是新对象，会导致后面循环采用前面的list。
+        wmanlist = list(wmanModDict.get(proid))  # 一定要加list(),否则不是新对象，会导致后面循环采用前面的list。
         # print(wmanlist)
         wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         wmanlist[seatNum[0] - 1] = wtstate
@@ -241,9 +245,10 @@ def do_with_thread(func):
     t1.start()
 
 
-def getValueList():
-    args = [1, 2, 3]
-    return args
+# def getValueList(xlsx):
+#     xlsx.loadxlsx()
+#
+#     return args
 
 
 def messages_from_xlsx(xlsx):
@@ -261,7 +266,7 @@ def messages_from_xlsx(xlsx):
 def generate_message(data, seatDict, wmanModDict):
     # xlsx.loadxlsx()
     msg = []
-    wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word,connect_code = data
+    wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word, connect_code = data
     if connect_code != '0':
         comstate = "(comstate|%s|%s)" % (wtid, connect_code)
         msg.append(comstate)
