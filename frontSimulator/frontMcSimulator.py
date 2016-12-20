@@ -36,21 +36,33 @@ class Application:
         winMC = tk.Frame(self.root, border=4)
         winMC.pack(side='top', anchor='w')
         self.mcgroupid = tk.StringVar(self.root, '224.1.1.15')
-        tk.Label(winMC, text='  组播ip： ').pack(side='left')
-        tk.Entry(winMC, width='12', textvariable=self.mcgroupid).pack(side='left')
+        tk.Label(winMC, text='  组播IP： ').pack(side='left')
+        tk.Entry(winMC, width='14', textvariable=self.mcgroupid).pack(side='left')
         self.mcport = tk.StringVar(self.root, '8769')
         tk.Label(winMC, text='  组播端口： ').pack(side='left')
-        tk.Entry(winMC, width='12', textvariable=self.mcport).pack(side='left')
+        tk.Entry(winMC, width='8', textvariable=self.mcport).pack(side='left')
+        self.sendip = tk.StringVar(self.root, '0.0.0.0')
+        tk.Label(winMC, text='  本机IP： ').pack(side='left')
+        tk.Entry(winMC, width='14', textvariable=self.sendip).pack(side='left')
+        self.sendport = tk.StringVar(self.root, '1501')
+        tk.Label(winMC, text='  本机发送端口： ').pack(side='left')
+        tk.Entry(winMC, width='8', textvariable=self.sendport).pack(side='left')
+
+        # win1 = tk.Frame(self.root, border=4)
+        # win1.pack(side='top', anchor='w')
+        # tk.Label(win1, text='-----------------------' * 8).pack(side='left')
+
+        winDiy = tk.Frame(self.root, border=4)
+        winDiy.pack(side='top', anchor='w')
         self.diyMCmsg = tk.StringVar(self.root)
-        tk.Label(winMC, text='  DIY组播消息： ').pack(side='left')
-        tk.Entry(winMC, width='67', textvariable=self.diyMCmsg).pack(side='left')
-        self.bt0 = tk.Button(winMC, text='DIY消息发送', padx=8, command=lambda: self.send_diy(self.diyMCmsg.get()))
+        tk.Label(winDiy, text='  DIY组播消息： ').pack(side='left')
+        tk.Entry(winDiy, width='67', textvariable=self.diyMCmsg).pack(side='left')
+        self.bt0 = tk.Button(winDiy, text='发送', padx=8, command=lambda: self.send_diy(self.diyMCmsg.get()))
         self.bt0.pack(side='left')
 
         win0 = tk.Frame(self.root, border=4)
         win0.pack(side='top', anchor='w')
-        win1 = tk.Frame(self.root, border=4)
-        win1.pack(side='top', anchor='w')
+
         win2 = tk.Frame(self.root, border=4)
         win2.pack(side='top', anchor='w')
 
@@ -59,7 +71,7 @@ class Application:
         # ttk.Combobox(win0, textvariable=wtid,values=getValueList(), width='12').pack(side='left')
         tk.Entry(win0, width='12', textvariable=wtid).pack(side='left')
 
-        protocolid = tk.StringVar(self.root, "1178")
+        protocolid = tk.StringVar(self.root, "1467")
         tk.Label(win0, text='  协议号： ').pack(side='left')
         # ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=protocolid).pack(side='left')
@@ -89,16 +101,16 @@ class Application:
         # lst4 = ttk.Combobox(win0, values=getValueList(), textvariable=code5, width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=stop_mode).pack(side='left')
 
-        self.bt1 = tk.Button(win0, text='单机单次组播', padx=8, command=lambda: self.send_one(
+        self.bt1 = tk.Button(win0, text='单机组播', padx=8, command=lambda: self.send_one(
             {"wtid": wtid.get(), "proid": protocolid.get(), "wtstate": wtstate.get(), "error_code": error_code.get(),
              "alarm_code": alarm_code.get(), "power_mode": power_mode.get(),
-             "stop_mode": stop_mode.get(), "connect_code": "0"}))
+             "stop_mode": stop_mode.get(), "connect_code": "0"}, self.times.get(), self.sleepTime.get()))
         self.bt1.pack(side='left')
 
-        tk.Label(win1, text='-----------------------' * 6).pack(side='left')
+        # tk.Label(win1, text='-----------------------' * 6).pack(side='left')
 
         self.times = tk.StringVar(self.root, '1')
-        tk.Label(win2, text='  批量次数： ').pack(side='left')
+        tk.Label(win2, text='  循环次数： ').pack(side='left')
         ttk.Combobox(win2, values=[1, 5, 10, 20, 30, 40], textvariable=self.times, width='4').pack(side='left')
         # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
 
@@ -106,7 +118,7 @@ class Application:
         tk.Label(win2, text='  间隔时间(s)： ').pack(side='left')
         tk.Entry(win2, width='4', textvariable=self.sleepTime).pack(side='left')
 
-        self.bt2 = tk.Button(win2, text='批量组播', padx=8,
+        self.bt2 = tk.Button(win2, text='Excel批量组播', padx=8,
                              command=lambda: do_with_thread(
                                  self.send_from_xlsx(self.times.get(), self.sleepTime.get())))
         self.bt2.pack(side='left')
@@ -128,11 +140,11 @@ class Application:
                     for msg in msgs:
                         if self.stopflag == 1:
                             break
-                        sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
+                        sender(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()), msg)
                         self.txt0.insert(1.0,
                                          datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                         self.txt0.update()
-                        time.sleep(int(sleepTime))
+                        time.sleep(float(sleepTime))
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
                                   :-3] + ": " + "-----finish-----" + "\n")
         except Exception as e:
@@ -141,27 +153,33 @@ class Application:
             self.stopflag = 0
             self.set_bt_normal()
 
-    def send_one(self, dataDict={}):
+    def send_one(self, dataDict={}, num='1', sleepTime='0'):
         self.xlsx.loadxlsx()
         seatDict = self.xlsx.get_sNdict_from_sheet()
         wmanModDict = self.xlsx.get_wmanModDict_from_sheet()
         try:
             self.set_bt_disabled()
-            for msg in generate_message2(dataDict, seatDict, wmanModDict):
-                sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
-                self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
-                self.txt0.update()
+            for i in range(int(num)):
+                if self.stopflag == 1:
+                    break
+                for msg in generate_message2(dataDict, seatDict, wmanModDict):
+                    sender(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()), msg)
+                    self.txt0.insert(1.0,
+                                     datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
+                    self.txt0.update()
+                time.sleep(float(sleepTime))
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
-                                  :-3] + ": " + "-----finish-----" + "\n\r")
+                                  :-3] + ": " + "-----finish-----" + "\n")
         except Exception as e:
             print(e)
         finally:
+            self.stopflag = 0
             self.set_bt_normal()
 
     def send_diy(self, msg):
         try:
             self.set_bt_disabled()
-            sender(self.mcgroupid.get(), int(self.mcport.get()), msg)
+            sender(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()), msg)
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
             self.txt0.update()
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
@@ -235,7 +253,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
             wmanlist[seatNum[2] - 1] = alarm_code
             alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
             msg.append(alarmdata)
-        msg.append('(wman|%s|' % wtid + ','.join(wmanlist))
+        msg.append('(wman|%s|' % wtid + ','.join(wmanlist)+')')
     return msg
 
 
@@ -293,7 +311,7 @@ def generate_message(data, seatDict, wmanModDict):
         wmanlist[seatNum[2] - 1] = alarm_code
         alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
         msg.append(alarmdata)
-    msg.append('(wman|%s|' % wtid + ','.join(wmanlist))
+    msg.append('(wman|%s|' % wtid + ','.join(wmanlist)+')')
     return msg
 
 

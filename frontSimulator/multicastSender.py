@@ -4,7 +4,7 @@ import struct
 from socket import *
 
 # 发送端本机ip和端口
-SENDERIP = '0.0.0.0'
+# SENDERIP = '192.168.149.12'
 # SENDERPORT = 1501
 
 # 组播地址端口等
@@ -13,9 +13,9 @@ SENDERIP = '0.0.0.0'
 MYTTL = 255
 
 
-def sender(MYGROUP, MYPORT, SENDDATA='testdata'):
+def sender(SENDERIP, SENDERPORT, MYGROUP, MYPORT, SENDDATA='testdata'):
     s = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)
-    #s.bind((SENDERIP, SENDERPORT))  # 这句注释掉都可以。发送端口会被自动分配。
+    s.bind((SENDERIP, SENDERPORT))  # 这句注释掉都可以。发送端口会被自动分配。
     # Set Time-to-live (optional)
     ttl_bin = struct.pack('@i', MYTTL)
     s.setsockopt(IPPROTO_IP, IP_MULTICAST_TTL, ttl_bin)
@@ -29,7 +29,5 @@ def sender(MYGROUP, MYPORT, SENDDATA='testdata'):
     print("send data ok !")
     # time.sleep(1)
 
-
 # if __name__ == "__main__":
 #     sender('10.80.6.57',1501,'224.1.1.15',4001)
-
