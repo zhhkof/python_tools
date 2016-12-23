@@ -7,7 +7,7 @@ import tkinter as tk
 import tkinter.messagebox as messagebox
 import time
 import hashlib
-from frontSimulator.multicastSender import sender
+from frontSimulator.socketTool import *
 from frontSimulator.xlsxTool import Excel
 import threading
 
@@ -41,9 +41,12 @@ class Application:
         self.mcport = tk.StringVar(self.root, '8769')
         tk.Label(winMC, text='  组播端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.mcport).pack(side='left')
+
         self.sendip = tk.StringVar(self.root, '0.0.0.0')
         tk.Label(winMC, text='  本机IP： ').pack(side='left')
-        tk.Entry(winMC, width='14', textvariable=self.sendip).pack(side='left')
+        ttk.Combobox(winMC, textvariable=self.sendip, values=get_ipList(), width='14').pack(side='left')
+        # tk.Entry(winMC, width='14', textvariable=self.sendip).pack(side='left')
+
         self.sendport = tk.StringVar(self.root, '1501')
         tk.Label(winMC, text='  本机发送端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.sendport).pack(side='left')
@@ -140,7 +143,8 @@ class Application:
                     for msg in msgs:
                         if self.stopflag == 1:
                             break
-                        sender(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()), msg)
+                        multicast_send(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(),
+                                       int(self.mcport.get()), msg)
                         self.txt0.insert(1.0,
                                          datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                         self.txt0.update()
@@ -163,7 +167,8 @@ class Application:
                 if self.stopflag == 1:
                     break
                 for msg in generate_message2(dataDict, seatDict, wmanModDict):
-                    sender(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()), msg)
+                    multicast_send(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(),
+                                   int(self.mcport.get()), msg)
                     self.txt0.insert(1.0,
                                      datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                     self.txt0.update()
@@ -179,7 +184,8 @@ class Application:
     def send_diy(self, msg):
         try:
             self.set_bt_disabled()
-            sender(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()), msg)
+            multicast_send(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()),
+                           msg)
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
             self.txt0.update()
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
@@ -253,7 +259,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
             wmanlist[seatNum[2] - 1] = alarm_code
             alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
             msg.append(alarmdata)
-        msg.append('(wman|%s|' % wtid + ','.join(wmanlist)+')')
+        msg.append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
     return msg
 
 
@@ -311,7 +317,7 @@ def generate_message(data, seatDict, wmanModDict):
         wmanlist[seatNum[2] - 1] = alarm_code
         alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
         msg.append(alarmdata)
-    msg.append('(wman|%s|' % wtid + ','.join(wmanlist)+')')
+    msg.append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
     return msg
 
 
