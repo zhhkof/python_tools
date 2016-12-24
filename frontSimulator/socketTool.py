@@ -30,9 +30,15 @@ def multicast_send(SENDERIP, SENDERPORT, MYGROUP, MYPORT, SENDDATA='testdata'):
     print("send data ok !")
     # time.sleep(1)
 
+def multicast_send2(**kwargs):
+    if 'SENDERIP' in kwargs.keys():
+        print(kwargs['SENDERIP'])
+    if 'SENDERPORT' in kwargs.keys():
+        print(kwargs['SENDERPORT'])
+multicast_send2(SENDERIP=1)
 
-HOST = '192.168.149.223'
-PORT = 8804
+# HOST = '192.168.149.223'
+# PORT = 8804
 
 
 def tcp_send(HOST, PORT, data):
@@ -47,7 +53,9 @@ def tcp_send(HOST, PORT, data):
     return result
 
 
-
 def get_ipList():
-    iplist=gethostbyname_ex(gethostname())[2]
-    return iplist
+    try:
+        iplist = gethostbyname_ex(gethostname())[2]
+        return iplist
+    except Exception:
+        return []
