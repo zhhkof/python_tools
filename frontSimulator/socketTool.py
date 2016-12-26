@@ -30,32 +30,40 @@ def multicast_send(SENDERIP, SENDERPORT, MYGROUP, MYPORT, SENDDATA='testdata'):
     print("send data ok !")
     # time.sleep(1)
 
-def multicast_send2(**kwargs):
-    if 'SENDERIP' in kwargs.keys():
-        print(kwargs['SENDERIP'])
-    if 'SENDERPORT' in kwargs.keys():
-        print(kwargs['SENDERPORT'])
-multicast_send2(SENDERIP=1)
+
+# def multicast_send2(**kwargs):
+#     if 'SENDERIP' in kwargs.keys():
+#         print(kwargs['SENDERIP'])
+#     if 'SENDERPORT' in kwargs.keys():
+#         print(kwargs['SENDERPORT'])
+# multicast_send2(SENDERIP=1)
 
 # HOST = '192.168.149.223'
 # PORT = 8804
 
 
 def tcp_send(HOST, PORT, data):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((HOST, PORT))
-    s.sendall(data.encode("utf-8"))
-    # print("send data:"+data)
-    resp = s.recv(1024)
-    # print("response:", resp.decode('utf-8'))
-    result = "send data: " + data + " | " + "response:" + resp.decode('utf-8')
-    s.close()
-    return result
+    s = socket(AF_INET, SOCK_STREAM)
+    try:
+        s.connect((HOST, PORT))
+        s.sendall(data.encode("utf-8"))
+        s.settimeout(1)
+        # print("send data:"+data)
+        resp = s.recv(1024)
+        # print("response:", resp.decode('utf-8'))
+        result = "[TCP] send data: " + data + " >>>>> " + "response:" + resp.decode('utf-8')
+        return result
+    except Exception as e:
+        # print(e)
+        return "[TCP] send failed!! {%s}" % str(e)
+    finally:
+        s.close()
 
 
 def get_ipList():
     try:
         iplist = gethostbyname_ex(gethostname())[2]
         return iplist
-    except Exception:
+    except Exception as e:
+        print(e)
         return []

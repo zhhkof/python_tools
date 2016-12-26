@@ -35,10 +35,23 @@ class Application:
 
         winMC = tk.Frame(self.root, border=4)
         winMC.pack(side='top', anchor='w')
+
+        winDiy = tk.Frame(self.root, border=4)
+        winDiy.pack(side='top', anchor='w')
+
+        win1 = tk.Frame(self.root, border=4)
+        win1.pack(side='top', anchor='w')
+
+        win0 = tk.Frame(self.root, border=4)
+        win0.pack(side='top', anchor='w')
+
+        win2 = tk.Frame(self.root, border=4)
+        win2.pack(side='top', anchor='w')
+
         self.mcgroupid = tk.StringVar(self.root, '224.1.1.15')
         tk.Label(winMC, text='  组播IP： ').pack(side='left')
         tk.Entry(winMC, width='14', textvariable=self.mcgroupid).pack(side='left')
-        self.mcport = tk.StringVar(self.root, '8769')
+        self.mcport = tk.IntVar(self.root, 8769)
         tk.Label(winMC, text='  组播端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.mcport).pack(side='left')
 
@@ -47,27 +60,33 @@ class Application:
         ttk.Combobox(winMC, textvariable=self.sendip, values=get_ipList(), width='14').pack(side='left')
         # tk.Entry(winMC, width='14', textvariable=self.sendip).pack(side='left')
 
-        self.sendport = tk.StringVar(self.root, '1501')
+        self.sendport = tk.IntVar(self.root, 1501)
         tk.Label(winMC, text='  本机发送端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.sendport).pack(side='left')
+
+        self.dds_ip = tk.StringVar(self.root, '192.168.149.223')
+        tk.Label(winMC, text='  数据处理IP： ').pack(side='left')
+        tk.Entry(winMC, width='14', textvariable=self.dds_ip).pack(side='left')
+
+        self.dds_port = tk.IntVar(self.root, 8804)
+        tk.Label(winMC, text='  数据处理端口： ').pack(side='left')
+        tk.Entry(winMC, width='8', textvariable=self.dds_port).pack(side='left')
 
         # win1 = tk.Frame(self.root, border=4)
         # win1.pack(side='top', anchor='w')
         # tk.Label(win1, text='-----------------------' * 8).pack(side='left')
 
-        winDiy = tk.Frame(self.root, border=4)
-        winDiy.pack(side='top', anchor='w')
         self.diyMCmsg = tk.StringVar(self.root)
-        tk.Label(winDiy, text='  DIY组播消息： ').pack(side='left')
-        tk.Entry(winDiy, width='67', textvariable=self.diyMCmsg).pack(side='left')
-        self.bt0 = tk.Button(winDiy, text='发送', padx=8, command=lambda: self.send_diy(self.diyMCmsg.get()))
-        self.bt0.pack(side='left')
+        tk.Label(winDiy, text='  自定义组播消息： ').pack(side='left')
+        tk.Entry(winDiy, width='50', textvariable=self.diyMCmsg).pack(side='left')
+        self.bt_diy0 = tk.Button(winDiy, text='发送', padx=8, command=lambda: self.sendmc_diy(self.diyMCmsg.get()))
+        self.bt_diy0.pack(side='left')
 
-        win0 = tk.Frame(self.root, border=4)
-        win0.pack(side='top', anchor='w')
-
-        win2 = tk.Frame(self.root, border=4)
-        win2.pack(side='top', anchor='w')
+        self.diyTCPmsg = tk.StringVar(self.root)
+        tk.Label(winDiy, text='  自定义TCP请求： ').pack(side='left')
+        tk.Entry(winDiy, width='50', textvariable=self.diyTCPmsg).pack(side='left')
+        self.bt_diy1 = tk.Button(winDiy, text='发送', padx=8, command=lambda: self.sendtcp_diy(self.diyTCPmsg.get()))
+        self.bt_diy1.pack(side='left')
 
         wtid = tk.StringVar(self.root)
         tk.Label(win0, text='  风机id： ').pack(side='left')
@@ -104,7 +123,19 @@ class Application:
         # lst4 = ttk.Combobox(win0, values=getValueList(), textvariable=code5, width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=stop_mode).pack(side='left')
 
-        self.bt1 = tk.Button(win0, text='单机组播', padx=8, command=lambda: self.send_one(
+        self.times = tk.StringVar(self.root, '1')
+        tk.Label(win1, text='  组播循环次数： ').pack(side='left')
+        ttk.Combobox(win1, values=[1, 5, 10, 20, 30, 40], textvariable=self.times, width='4').pack(side='left')
+        # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
+
+        self.sleepTime = tk.StringVar(self.root, '0')
+        tk.Label(win1, text='  单条组播间隔(s)： ').pack(side='left')
+        tk.Entry(win1, width='4', textvariable=self.sleepTime).pack(side='left')
+
+        self.is_sendtcp = IntVar(self.root, 0)  # 1-select,0-unselect
+        tk.Checkbutton(win1, text='组播时发送对应tcp请求', variable=self.is_sendtcp).pack(side='left')
+
+        self.bt1 = tk.Button(win0, text='单风机数据发送', padx=8, command=lambda: self.send_one(
             {"wtid": wtid.get(), "proid": protocolid.get(), "wtstate": wtstate.get(), "error_code": error_code.get(),
              "alarm_code": alarm_code.get(), "power_mode": power_mode.get(),
              "stop_mode": stop_mode.get(), "connect_code": "0"}, self.times.get(), self.sleepTime.get()))
@@ -112,16 +143,7 @@ class Application:
 
         # tk.Label(win1, text='-----------------------' * 6).pack(side='left')
 
-        self.times = tk.StringVar(self.root, '1')
-        tk.Label(win2, text='  循环次数： ').pack(side='left')
-        ttk.Combobox(win2, values=[1, 5, 10, 20, 30, 40], textvariable=self.times, width='4').pack(side='left')
-        # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
-
-        self.sleepTime = tk.StringVar(self.root, '0')
-        tk.Label(win2, text='  间隔时间(s)： ').pack(side='left')
-        tk.Entry(win2, width='4', textvariable=self.sleepTime).pack(side='left')
-
-        self.bt2 = tk.Button(win2, text='Excel批量组播', padx=8,
+        self.bt2 = tk.Button(win2, text='批量Excel数据发送', padx=8,
                              command=lambda: do_with_thread(
                                  self.send_from_xlsx(self.times.get(), self.sleepTime.get())))
         self.bt2.pack(side='left')
@@ -133,18 +155,27 @@ class Application:
 
     def send_from_xlsx(self, num, sleepTime):
         self.set_bt_disabled()
+        messages = messages_from_xlsx2(self.xlsx)
         try:
+
             for i in range(int(num)):
-                if self.stopflag == 1:
-                    break
-                for msgs in messages_from_xlsx2(self.xlsx):
+                for msgs in messages:
                     if self.stopflag == 1:
                         break
-                    for msg in msgs:
+                    # tcp单次请求
+                    if i == 0 and len(msgs['tcp']) > 0 and self.is_sendtcp.get() == 1:
+                        for tcpmsg in msgs['tcp']:
+                            tcp_result = tcp_send(self.dds_ip.get(), self.dds_port.get(), tcpmsg)
+                            self.txt0.insert(1.0,
+                                             datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
+                                             :-3] + ": " + tcp_result + "\n")
+                            self.txt0.update()
+                    # 组播循环
+                    for msg in msgs['multicast']:
                         if self.stopflag == 1:
                             break
-                        multicast_send(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(),
-                                       int(self.mcport.get()), msg)
+                        multicast_send(self.sendip.get(), self.sendport.get(), self.mcgroupid.get(),
+                                       self.mcport.get(), msg)
                         self.txt0.insert(1.0,
                                          datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                         self.txt0.update()
@@ -161,18 +192,28 @@ class Application:
         self.xlsx.loadxlsx()
         seatDict = self.xlsx.get_sNdict_from_sheet()
         wmanModDict = self.xlsx.get_wmanModDict_from_sheet()
+        msgs = generate_message2(dataDict, seatDict, wmanModDict)
         try:
             self.set_bt_disabled()
             for i in range(int(num)):
                 if self.stopflag == 1:
                     break
-                for msg in generate_message2(dataDict, seatDict, wmanModDict):
-                    multicast_send(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(),
-                                   int(self.mcport.get()), msg)
+                if i == 0 and len(msgs['tcp']) > 0 and self.is_sendtcp.get() == 1:
+                    for tcpmsg in msgs['tcp']:
+                        tcp_result = tcp_send(self.dds_ip.get(), self.dds_port.get(), tcpmsg)
+                        self.txt0.insert(1.0,
+                                         datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
+                                         :-3] + ": " + tcp_result + "\n")
+                        self.txt0.update()
+                for msg in msgs['multicast']:
+                    if self.stopflag == 1:
+                        break
+                    multicast_send(self.sendip.get(), self.sendport.get(), self.mcgroupid.get(),
+                                   self.mcport.get(), msg)
                     self.txt0.insert(1.0,
                                      datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
                     self.txt0.update()
-                time.sleep(float(sleepTime))
+                    time.sleep(float(sleepTime))
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
                                   :-3] + ": " + "-----finish-----" + "\n")
         except Exception as e:
@@ -181,10 +222,10 @@ class Application:
             self.stopflag = 0
             self.set_bt_normal()
 
-    def send_diy(self, msg):
+    def sendmc_diy(self, msg):
         try:
             self.set_bt_disabled()
-            multicast_send(self.sendip.get(), int(self.sendport.get()), self.mcgroupid.get(), int(self.mcport.get()),
+            multicast_send(self.sendip.get(), self.sendport.get(), self.mcgroupid.get(), self.mcport.get(),
                            msg)
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
             self.txt0.update()
@@ -195,13 +236,22 @@ class Application:
         finally:
             self.set_bt_normal()
 
+    def sendtcp_diy(self, msg):
+        self.set_bt_disabled()
+        tcp_result = tcp_send(self.dds_ip.get(), self.dds_port.get(), msg)  # 超时设置1秒
+        self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + tcp_result + "\n")
+        self.txt0.update()
+        self.set_bt_normal()
+
     def set_bt_disabled(self):
-        self.bt0.config(state=DISABLED)
+        self.bt_diy0.config(state=DISABLED)
+        self.bt_diy1.config(state=DISABLED)
         self.bt1.config(state=DISABLED)
         self.bt2.config(state=DISABLED)
 
     def set_bt_normal(self):
-        self.bt0.config(state=NORMAL)
+        self.bt_diy0.config(state=NORMAL)
+        self.bt_diy1.config(state=NORMAL)
         self.bt1.config(state=NORMAL)
         self.bt2.config(state=NORMAL)
 
@@ -214,26 +264,28 @@ class Application:
 
 def messages_from_xlsx2(xlsx):
     xlsx.loadxlsx()
-    datalist2 = xlsx.get_datalist_from_sheet2()
+    datalist2 = xlsx.get_datalist_from_sheet2()  # 从xlsx中获取所有行为list
     seatDict = xlsx.get_sNdict_from_sheet()
     wmanModDict = xlsx.get_wmanModDict_from_sheet()
     msgs = []
     for datadict in datalist2:
-        msgs.append(generate_message2(datadict, seatDict, wmanModDict))
-    # print(msgs)
-    # print(msgs)
+        msgdict = generate_message2(datadict, seatDict, wmanModDict)
+        msgs.append(msgdict)
     return msgs
 
 
+# 根据行记录或ui输入记录生成单风机的发送数据
 def generate_message2(datadict, seatDict, wmanModDict):
     # xlsx.loadxlsx()
-    msg = []
+    msgdict = {'multicast': [], 'tcp': []}  # 单风机数据dict，key:multicast,tcp
+    # msg = []
     for key in datadict:
         exec(key + "='" + datadict.get(key) + "'", globals())
         # print(key+":"+datadict.get(key))
     if connect_code != '0':
         comstate = "(comstate|%s|%s)" % (wtid, connect_code)
-        msg.append(comstate)
+        # msg.append(comstate)
+        msgdict['multicast'].append(comstate)
     else:
         seatNum = seatDict.get(proid)
         print("ok")
@@ -243,7 +295,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
         wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         wmanlist[seatNum[0] - 1] = wtstate
         statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
-
+        msgdict['tcp'].append(statedata)
         if power_mode != '0':
             power_flag = 'true'
             wmanlist[seatNum[4] - 1] = power_flag
@@ -254,13 +306,19 @@ def generate_message2(datadict, seatDict, wmanModDict):
         if error_code != '0':
             wmanlist[seatNum[1] - 1] = error_code
             falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code))
-            msg.append(falutdata)
+            # msg.append(falutdata)
+            msgdict['multicast'].append(falutdata)
+            msgdict['tcp'].append(falutdata)
         if alarm_code != '0':
             wmanlist[seatNum[2] - 1] = alarm_code
             alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
-            msg.append(alarmdata)
-        msg.append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
-    return msg
+            # msg.append(alarmdata)
+            msgdict['multicast'].append(alarmdata)
+            msgdict['tcp'].append(alarmdata)
+        # msg.append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
+        msgdict['multicast'].append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
+    # print(msgdict)
+    return msgdict
 
 
 def do_with_thread(func):
@@ -332,6 +390,6 @@ def generate_unique_code(text):
 
 
 root = tk.Tk()
-root.title("frontSimulator tool")
+root.title("风机状态模拟信息组播/tcp发送工具")
 a = Application(root)
 root.mainloop()
