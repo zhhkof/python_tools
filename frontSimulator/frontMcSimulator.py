@@ -292,7 +292,8 @@ def generate_message2(datadict, seatDict, wmanModDict):
         # wmanlist = list(wmanlist1178)
         wmanlist = list(wmanModDict.get(proid))  # 一定要加list(),否则不是新对象，会导致后面循环采用前面的list。
         # print(wmanlist)
-        wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+        wmanlist[0] = now_time
         wmanlist[seatNum[0] - 1] = wtstate
         statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
         msgdict['tcp'].append(statedata)
@@ -305,7 +306,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
             wmanlist[seatNum[5] - 1] = stop_mode
         if error_code != '0':
             wmanlist[seatNum[1] - 1] = error_code
-            falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code))
+            falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code +now_time))
             # msg.append(falutdata)
             msgdict['multicast'].append(falutdata)
             msgdict['tcp'].append(falutdata)
@@ -359,6 +360,7 @@ def generate_message(data, seatDict, wmanModDict):
     wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
     wmanlist[seatNum[0] - 1] = wtstate
     statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
+    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
 
     if power_mode_word != '0':
         power_flag = 'true'
@@ -369,7 +371,7 @@ def generate_message(data, seatDict, wmanModDict):
         wmanlist[seatNum[5] - 1] = stop_mode_word
     if error_code != '0':
         wmanlist[seatNum[1] - 1] = error_code
-        falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code))
+        falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code+now_time))
         msg.append(falutdata)
     if alarm_code != '0':
         wmanlist[seatNum[2] - 1] = alarm_code
