@@ -306,7 +306,8 @@ def generate_message2(datadict, seatDict, wmanModDict):
             wmanlist[seatNum[5] - 1] = stop_mode
         if error_code != '0':
             wmanlist[seatNum[1] - 1] = error_code
-            falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code +now_time))
+            falutdata = '(falutdata|%s|%s| |2|%s)' % (
+            wtid, error_code, generate_unique_code(wtid + error_code + now_time))
             # msg.append(falutdata)
             msgdict['multicast'].append(falutdata)
             msgdict['tcp'].append(falutdata)
@@ -371,7 +372,7 @@ def generate_message(data, seatDict, wmanModDict):
         wmanlist[seatNum[5] - 1] = stop_mode_word
     if error_code != '0':
         wmanlist[seatNum[1] - 1] = error_code
-        falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code+now_time))
+        falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code + now_time))
         msg.append(falutdata)
     if alarm_code != '0':
         wmanlist[seatNum[2] - 1] = alarm_code
@@ -388,6 +389,7 @@ def generate_unique_code(text):
     l[7] += '-'
     l[11] += '-'
     l[15] += '-'
+    l[19] += '-'
     return ''.join(l)
 
 
