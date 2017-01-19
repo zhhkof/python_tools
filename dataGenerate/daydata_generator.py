@@ -6,7 +6,8 @@ import random
 def randf(min, max, precision=2):
     return round(random.uniform(min, max), precision)
 
-
+wfid=140802
+wtid=140802200
 rectime = datetime.datetime.strptime("2016-01-01 00:00:00", "%Y-%m-%d %H:%M:%S")
 
 conn = psycopg2.connect(database='2HA', user='postgres', password='postgres', host='10.80.5.43', port='5432')
@@ -14,6 +15,7 @@ cur = conn.cursor()
 
 id = [0] * 125
 for i in range(366):
+    #此处指定长度125不包含rectime是为了与daydata表列对应。
     id[0] = randf(7, 18)
     id[1] = randf(0, 3)
     id[2] = randf(18, 35)
@@ -128,7 +130,7 @@ for i in range(366):
     id[124] = randf(10.58, 348.11)
     id.insert(0, rectime.strftime("%Y-%m-%d %H:%M:%S"))
     print(tuple(id))
-    cur.execute('''INSERT INTO public.daydata VALUES(140802, 140802200''' + ',%s' * 126 + ');', tuple(id))
+    cur.execute('''INSERT INTO public.daydata VALUES(%s''' + ',%s' * 127 + ');', tuple([wfid,wtid]+id))
     if i % 50 == 0:
         conn.commit()
 
