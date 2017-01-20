@@ -10,14 +10,14 @@ def randf(min, max, precision=2):
 wfid = 140802
 wtid = 140802200
 # 数据条数，请自行计算
-num = 1
+num = 60*24*731
 # 延续性造数据开关
 goon = True
 # 数据起始时间，当goon为True且风机存在底量数据时，此项无效
-first_time = '2016-08-01 00:00:00'
+first_time = '2015-01-01 00:00:00'
 rectime = datetime.datetime.strptime(first_time, "%Y-%m-%d %H:%M:%S")
 
-conn = psycopg2.connect(database='2HA', user='postgres', password='postgres', host='10.80.5.43', port='5432')
+conn = psycopg2.connect(database='v5_test', user='postgres', password='postgres', host='10.80.5.43', port='5432')
 cur = conn.cursor()
 cur.execute('select * from public.onedata where wtid= %s order by rectime desc limit 1', (wtid,))
 row = cur.fetchall()
