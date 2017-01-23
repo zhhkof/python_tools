@@ -6,48 +6,52 @@ import random
 def randf(min, max, precision=2):
     return round(random.uniform(min, max), precision)
 
+
 # 风机信息
 wfid = 140802
-wtid = 140802200
+wtid = 140802203
 # 数据条数，请自行计算
-num = 10
+num = 6 * 24 * 731
 # 延续性造数据开关True/False
 goon = True
 # 数据起始时间，当goon为True且风机存在底量数据时，此项无效
-first_time = '2016-01-01 00:00:00'
+first_time = '2015-01-01 00:00:00'
 
-conn = psycopg2.connect(database='2HA', user='postgres', password='postgres', host='10.80.5.43', port='5432')
+conn = psycopg2.connect(database='v5_test', user='postgres', password='postgres', host='10.80.5.43', port='5432')
 cur = conn.cursor()
-cur.execute('select * from public.statisticdata where wtid= %s order by rectime desc limit 1', (wtid,))
-row = cur.fetchall()
 
 id = [0] * 125
-if goon and len(row) > 0:
-    for i in range(125):
-        id[i] = float(row[0][i + 3])
-    rectime = row[0][2] + datetime.timedelta(minutes=10)
-    id[18] = id[19]
-    id[20] = id[21]
-    id[22] = id[23]
-    id[24] = id[25]
-    id[26] = id[27]
-    id[28] = id[29]
-    id[30] = id[31]
-    id[32] = id[33]
-    id[34] = id[35]
-    id[103] = id[104]
-    id[105] = id[106]
-    id[107] = id[108]
-    id[109] = id[110]
-    id[111] = id[112]
-    id[113] = id[114]
-    id[115] = id[116]
-    id[117] = id[118]
+if goon:
+    cur.execute('select * from public.statisticdata where wtid= %s order by rectime desc limit 1', (wtid,))
+    row = cur.fetchall()
+    if len(row) > 0:
+        for i in range(125):
+            id[i] = float(row[0][i + 3])
+        rectime = row[0][2] + datetime.timedelta(minutes=10)
+        id[18] = id[19]
+        id[20] = id[21]
+        id[22] = id[23]
+        id[24] = id[25]
+        id[26] = id[27]
+        id[28] = id[29]
+        id[30] = id[31]
+        id[32] = id[33]
+        id[34] = id[35]
+        id[103] = id[104]
+        id[105] = id[106]
+        id[107] = id[108]
+        id[109] = id[110]
+        id[111] = id[112]
+        id[113] = id[114]
+        id[115] = id[116]
+        id[117] = id[118]
+    else:
+        rectime = datetime.datetime.strptime(first_time, "%Y-%m-%d %H:%M:%S")
 else:
     rectime = datetime.datetime.strptime(first_time, "%Y-%m-%d %H:%M:%S")
 
 for i in range(num):
-    #此处指定长度125不包含rectime是为了与statisticdata表列对应。
+    # 此处指定长度125不包含rectime是为了与statisticdata表列对应。
     id[0] = randf(7, 18)
     id[1] = randf(0, 3)
     id[2] = randf(18, 35)
@@ -67,15 +71,15 @@ for i in range(num):
     id[16] = randf(-200, 20)
     id[17] = randf(800, 1800)
 
-    id[19] = id[18] + randf(5000, 10000)/144
-    id[21] = id[20] + randf(3, 4)/144
-    id[23] = id[22] + randf(20, 24)/144
-    id[25] = id[24] + randf(2, 4)/144
-    id[27] = id[26] + randf(20, 24)/144
-    id[29] = id[28] + randf(20, 24)/144
-    id[31] = id[30] + randf(0, 10)/144
-    id[33] = id[32] + randf(0, 10)/144
-    id[35] = id[34] + randf(0, 10)/144
+    id[19] = id[18] + randf(5000, 10000) / 144
+    id[21] = id[20] + randf(3, 4) / 144
+    id[23] = id[22] + randf(20, 24) / 144
+    id[25] = id[24] + randf(2, 4) / 144
+    id[27] = id[26] + randf(20, 24) / 144
+    id[29] = id[28] + randf(20, 24) / 144
+    id[31] = id[30] + randf(0, 10) / 144
+    id[33] = id[32] + randf(0, 10) / 144
+    id[35] = id[34] + randf(0, 10) / 144
 
     id[36] = randf(1.27, 185.62)
     id[37] = randf(-0.03, 16.57)
@@ -145,14 +149,14 @@ for i in range(num):
     id[101] = randf(0, 21.64)
     id[102] = randf(0, 25)
 
-    id[104] = id[103] + randf(15, 20)/144
-    id[106] = id[105] + randf(15, 20)/144
-    id[108] = id[107] + randf(15, 20)/144
-    id[110] = id[109] + randf(15, 20)/144
-    id[112] = id[111] + randf(15, 20)/144
-    id[114] = id[113] + randf(15, 20)/144
-    id[116] = id[115] + randf(15, 20)/144
-    id[118] = id[117] + randf(15, 20)/144
+    id[104] = id[103] + randf(15, 20) / 144
+    id[106] = id[105] + randf(15, 20) / 144
+    id[108] = id[107] + randf(15, 20) / 144
+    id[110] = id[109] + randf(15, 20) / 144
+    id[112] = id[111] + randf(15, 20) / 144
+    id[114] = id[113] + randf(15, 20) / 144
+    id[116] = id[115] + randf(15, 20) / 144
+    id[118] = id[117] + randf(15, 20) / 144
 
     id[119] = randf(24.58, 1414.36)
     id[120] = randf(0, 1161.2)
@@ -162,7 +166,7 @@ for i in range(num):
     id[124] = randf(10.58, 348.11)
     id.insert(0, rectime.strftime("%Y-%m-%d %H:%M:%S"))
     print(tuple(id))
-    cur.execute('''INSERT INTO public.statisticdata VALUES(%s''' + ',%s' * 127 + ');', tuple([wfid,wtid]+id))
+    cur.execute('''INSERT INTO public.statisticdata VALUES(%s''' + ',%s' * 127 + ');', tuple([wfid, wtid] + id))
     if i % 50 == 0:
         conn.commit()
 
