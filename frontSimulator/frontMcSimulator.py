@@ -79,7 +79,9 @@ class Application:
         self.diyMCmsg = tk.StringVar(self.root)
         tk.Label(winDiy, text='  自定义组播消息： ').pack(side='left')
         tk.Entry(winDiy, width='50', textvariable=self.diyMCmsg).pack(side='left')
-        self.bt_diy0 = tk.Button(winDiy, text='发送', padx=8, command=lambda: self.sendmc_diy(self.diyMCmsg.get()))
+        self.bt_diy0 = tk.Button(winDiy, text='发送', padx=8,
+                                 command=lambda: self.sendmc_diy(self.diyMCmsg.get(), self.times.get(),
+                                                                 self.sleepTime.get()))
         self.bt_diy0.pack(side='left')
 
         self.diyTCPmsg = tk.StringVar(self.root)
@@ -128,12 +130,12 @@ class Application:
         ttk.Combobox(win1, values=[1, 5, 10, 20, 30, 40], textvariable=self.times, width='4').pack(side='left')
         # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
 
-        self.sleepTime = tk.StringVar(self.root, '0')
+        self.sleepTime = tk.StringVar(self.root, '1')
         tk.Label(win1, text='  单条组播间隔(s)： ').pack(side='left')
         tk.Entry(win1, width='4', textvariable=self.sleepTime).pack(side='left')
 
         self.is_sendtcp = IntVar(self.root, 0)  # 1-select,0-unselect
-        tk.Checkbutton(win1, text='组播时发送对应tcp请求', variable=self.is_sendtcp).pack(side='left')
+        tk.Checkbutton(win1, text='组播时发送对应tcp请求(仅一次)', variable=self.is_sendtcp).pack(side='left')
 
         self.bt1 = tk.Button(win0, text='单风机数据发送', padx=8, command=lambda: self.send_one(
             {"wtid": wtid.get(), "proid": protocolid.get(), "wtstate": wtstate.get(), "error_code": error_code.get(),
@@ -157,7 +159,7 @@ class Application:
         self.set_bt_disabled()
         messages = messages_from_xlsx2(self.xlsx)
         try:
-
+            self.stopflag = 0
             for i in range(int(num)):
                 for msgs in messages:
                     if self.stopflag == 1:
@@ -188,13 +190,14 @@ class Application:
             self.stopflag = 0
             self.set_bt_normal()
 
-    def send_one(self, dataDict={}, num='1', sleepTime='0'):
+    def send_one(self, dataDict={}, num='1', sleepTime='1'):
         self.xlsx.loadxlsx()
         seatDict = self.xlsx.get_sNdict_from_sheet()
         wmanModDict = self.xlsx.get_wmanModDict_from_sheet()
         msgs = generate_message2(dataDict, seatDict, wmanModDict)
         try:
             self.set_bt_disabled()
+            self.stopflag =0
             for i in range(int(num)):
                 if self.stopflag == 1:
                     break
@@ -222,18 +225,25 @@ class Application:
             self.stopflag = 0
             self.set_bt_normal()
 
-    def sendmc_diy(self, msg):
+    def sendmc_diy(self, msg, num='1', sleepTime='1'):
         try:
             self.set_bt_disabled()
-            multicast_send(self.sendip.get(), self.sendport.get(), self.mcgroupid.get(), self.mcport.get(),
-                           msg)
-            self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
-            self.txt0.update()
+            self.stopflag = 0
+            for i in range(int(num)):
+                if self.stopflag == 1:
+                    break
+                multicast_send(self.sendip.get(), self.sendport.get(), self.mcgroupid.get(), self.mcport.get(),
+                               msg)
+                self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[:-3] + ": " + msg + "\n")
+                self.txt0.update()
+                time.sleep(float(sleepTime))
+
             self.txt0.insert(1.0, datetime.datetime.now().strftime('%m-%d %H:%M:%S.%f')[
-                                  :-3] + ": " + "-----finish-----" + "\n\r")
+                                  :-3] + ": " + "-----finish-----" + "\n")
         except Exception as e:
             print(e)
         finally:
+            self.stopflag = 0
             self.set_bt_normal()
 
     def sendtcp_diy(self, msg):
@@ -307,7 +317,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
         if error_code != '0':
             wmanlist[seatNum[1] - 1] = error_code
             falutdata = '(falutdata|%s|%s| |2|%s)' % (
-            wtid, error_code, generate_unique_code(wtid + error_code + now_time))
+                wtid, error_code, generate_unique_code(wtid + error_code + now_time))
             # msg.append(falutdata)
             msgdict['multicast'].append(falutdata)
             msgdict['tcp'].append(falutdata)
