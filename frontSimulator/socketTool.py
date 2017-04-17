@@ -59,6 +59,7 @@ def tcp_send(HOST, PORT, data):
 def get_ipList():
     try:
         iplist = gethostbyname_ex(gethostname())[2]
+        iplist.reverse()
         return iplist
     except Exception as e:
         print(e)

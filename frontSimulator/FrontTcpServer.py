@@ -2,6 +2,7 @@ import socket, time, random
 from frontSimulator.xlsxTool import Excel
 import threading
 
+
 # GW750机型前置tcpserver模拟
 class TcpServer750(threading.Thread):
     def __init__(self, host, listen_prot):
@@ -34,7 +35,8 @@ class TcpServer750(threading.Thread):
             reslist = packages[wtid + '|' + package_name]
             return '((' + ",".join(reslist) + '))'
         else:
-            return request+"[error input]"
+            return request + "[error input]"
+
 
 if __name__ == '__main__':
     e = TcpServer750('10.80.10.248', 7777)

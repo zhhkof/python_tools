@@ -172,11 +172,11 @@ class Application:
         server_frame = tk.Frame(root, border=4)
         server_frame.pack(side='top', anchor='w')
 
-        server_ip = tk.StringVar(root, '0.0.0.0')
+        server_ip = tk.StringVar(root, get_ipList()[0])
         tk.Label(server_frame, text='  服务ip： ').pack(side='left')
         ttk.Combobox(server_frame, textvariable=server_ip, values=get_ipList(), width='14').pack(side='left')
 
-        port = tk.IntVar(root, 9999)
+        port = tk.IntVar(root, 8801)
         tk.Label(server_frame, text='  端口： ').pack(side='left')
         # ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
         tk.Entry(server_frame, width='6', textvariable=port).pack(side='left')
@@ -378,7 +378,7 @@ def generate_message2(datadict, seatDict, wmanModDict):
 
 def do_with_thread(func):
     t1 = threading.Thread(target=func)
-    t1.setDaemon(False)
+    t1.setDaemon(True)
     t1.start()
 
 
