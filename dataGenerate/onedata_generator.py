@@ -11,17 +11,17 @@ def randf(min, max, precision=2):
 wfid = 140802
 wtids = [140802200, 140802201, 140802202, 140802203]
 # 数据条数，请自行计算
-num = 60 * 24 * 585
+num = 60 * 24 * 28
 # 延续性造数据开关
 goon = False
 # 数据起始时间，当goon为True且风机存在底量数据时，此项无效
-first_time = '2015-01-01 00:00:00'
+first_time = '2016-02-01 00:00:00'
 rectime = datetime.datetime.strptime(first_time, "%Y-%m-%d %H:%M:%S")
 
-conn = psycopg2.connect(database='v5_test', user='postgres', password='postgres', host='10.80.5.43', port='5432')
+conn = psycopg2.connect(database='v5_test', user='postgres', password='postgres', host='10.80.5.58', port='5432')
 cur = conn.cursor()
 
-id = [0] * 11
+id = [0] * 12
 for wtid in wtids:
     if goon:
         cur.execute('select * from public.onedata where wtid= %s order by rectime desc limit 1', (wtid,))
@@ -46,7 +46,7 @@ for wtid in wtids:
         id[10] = id[9] + randf(5, 25)
         print(tuple([wfid, wtid] + id))
 
-        cur.execute('''INSERT INTO public.onedata VALUES(%s''' + ',%s' * 12 + ');', tuple([wfid, wtid] + id))
+        cur.execute('''INSERT INTO public.onedata VALUES(%s''' + ',%s' * 13 + ');', tuple([wfid, wtid] + id))
         if i % 50 == 0:
             conn.commit()
 

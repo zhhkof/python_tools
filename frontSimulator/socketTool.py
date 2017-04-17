@@ -63,3 +63,14 @@ def get_ipList():
     except Exception as e:
         print(e)
         return []
+
+
+def isServerStart(ip, port):
+    s = socket(AF_INET, SOCK_STREAM)
+    try:
+        if s.connect_ex((ip, port)) == 0:
+            return True
+        else:
+            return False
+    except:
+        return False

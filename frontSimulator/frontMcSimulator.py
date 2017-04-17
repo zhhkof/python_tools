@@ -9,18 +9,31 @@ import time
 import hashlib
 from frontSimulator.socketTool import *
 from frontSimulator.xlsxTool import Excel
+from frontSimulator.FrontTcpServer import TcpServer750
 import threading
 
 
 class Application:
     def __init__(self, root):
         self.root = root
-        self.create_frame_bottom()
+        # self.frmNoteBook = LabelFrame(self.root, text="功能",border=4)
+        # self.frmNoteBook.grid(row=0, column=0, sticky='s' + 'w' + 'e' + 'n')
+        note_book = ttk.Notebook(self.root)  # width=1300,height=700
+        note_book.grid(row=0, column=0, sticky='s' + 'w' + 'e' + 'n')
+
+        tab_frame1 = tk.Frame(note_book)
+        note_book.add(tab_frame1, text='风机状态模拟', padding=1)
+        tab_frame2 = tk.Frame(note_book)
+        note_book.add(tab_frame2, text='GW750前置模拟', padding=1)
+
+        self.create_front_mc_simulator(tab_frame1)
+        self.create_tcp_server_for_gw750(tab_frame2)
+
         self.stopflag = 0
         self.xlsx = Excel()
 
-    def create_frame_bottom(self):
-        winTs = tk.Frame(self.root, border=4)
+    def create_front_mc_simulator(self, root):
+        winTs = tk.Frame(root, border=4)
         winTs.pack(side='top', anchor='w')
         self.txt0 = tk.Text(winTs, width=160, height=30, border=5, wrap='none')
         self.sly = tk.Scrollbar(winTs, orient=tk.VERTICAL)
@@ -33,50 +46,50 @@ class Application:
         self.slx.pack(side='bottom', fill='x', expand=0, anchor=N)
         self.txt0.pack(side='left', expand=1, fill='x')
 
-        winMC = tk.Frame(self.root, border=4)
+        winMC = tk.Frame(root, border=4)
         winMC.pack(side='top', anchor='w')
 
-        winDiy = tk.Frame(self.root, border=4)
+        winDiy = tk.Frame(root, border=4)
         winDiy.pack(side='top', anchor='w')
 
-        win1 = tk.Frame(self.root, border=4)
+        win1 = tk.Frame(root, border=4)
         win1.pack(side='top', anchor='w')
 
-        win0 = tk.Frame(self.root, border=4)
+        win0 = tk.Frame(root, border=4)
         win0.pack(side='top', anchor='w')
 
-        win2 = tk.Frame(self.root, border=4)
+        win2 = tk.Frame(root, border=4)
         win2.pack(side='top', anchor='w')
 
-        self.mcgroupid = tk.StringVar(self.root, '224.1.1.15')
+        self.mcgroupid = tk.StringVar(root, '224.1.1.15')
         tk.Label(winMC, text='  组播IP： ').pack(side='left')
         tk.Entry(winMC, width='14', textvariable=self.mcgroupid).pack(side='left')
-        self.mcport = tk.IntVar(self.root, 8769)
+        self.mcport = tk.IntVar(root, 8769)
         tk.Label(winMC, text='  组播端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.mcport).pack(side='left')
 
-        self.sendip = tk.StringVar(self.root, '0.0.0.0')
+        self.sendip = tk.StringVar(root, '0.0.0.0')
         tk.Label(winMC, text='  本机IP： ').pack(side='left')
         ttk.Combobox(winMC, textvariable=self.sendip, values=get_ipList(), width='14').pack(side='left')
         # tk.Entry(winMC, width='14', textvariable=self.sendip).pack(side='left')
 
-        self.sendport = tk.IntVar(self.root, 1501)
+        self.sendport = tk.IntVar(root, 1501)
         tk.Label(winMC, text='  本机发送端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.sendport).pack(side='left')
 
-        self.dds_ip = tk.StringVar(self.root, '192.168.149.223')
+        self.dds_ip = tk.StringVar(root, '192.168.149.223')
         tk.Label(winMC, text='  数据处理IP： ').pack(side='left')
         tk.Entry(winMC, width='14', textvariable=self.dds_ip).pack(side='left')
 
-        self.dds_port = tk.IntVar(self.root, 8804)
+        self.dds_port = tk.IntVar(root, 8804)
         tk.Label(winMC, text='  数据处理端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.dds_port).pack(side='left')
 
-        # win1 = tk.Frame(self.root, border=4)
+        # win1 = tk.Frame(root, border=4)
         # win1.pack(side='top', anchor='w')
         # tk.Label(win1, text='-----------------------' * 8).pack(side='left')
 
-        self.diyMCmsg = tk.StringVar(self.root)
+        self.diyMCmsg = tk.StringVar(root)
         tk.Label(winDiy, text='  自定义组播消息： ').pack(side='left')
         tk.Entry(winDiy, width='50', textvariable=self.diyMCmsg).pack(side='left')
         self.bt_diy0 = tk.Button(winDiy, text='发送', padx=8,
@@ -84,57 +97,57 @@ class Application:
                                                                  self.sleepTime.get()))
         self.bt_diy0.pack(side='left')
 
-        self.diyTCPmsg = tk.StringVar(self.root)
+        self.diyTCPmsg = tk.StringVar(root)
         tk.Label(winDiy, text='  自定义TCP请求： ').pack(side='left')
         tk.Entry(winDiy, width='50', textvariable=self.diyTCPmsg).pack(side='left')
         self.bt_diy1 = tk.Button(winDiy, text='发送', padx=8, command=lambda: self.sendtcp_diy(self.diyTCPmsg.get()))
         self.bt_diy1.pack(side='left')
 
-        wtid = tk.StringVar(self.root)
+        wtid = tk.StringVar(root)
         tk.Label(win0, text='  风机id： ').pack(side='left')
         # ttk.Combobox(win0, textvariable=wtid,values=getValueList(), width='12').pack(side='left')
         tk.Entry(win0, width='12', textvariable=wtid).pack(side='left')
 
-        protocolid = tk.StringVar(self.root, "1467")
+        protocolid = tk.StringVar(root, "1467")
         tk.Label(win0, text='  协议号： ').pack(side='left')
         # ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=protocolid).pack(side='left')
 
-        wtstate = tk.StringVar(self.root, '0')
+        wtstate = tk.StringVar(root, '0')
         tk.Label(win0, text='  风机状态： ').pack(side='left')
         # ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=wtstate).pack(side='left')
 
-        error_code = tk.StringVar(self.root, '0')
+        error_code = tk.StringVar(root, '0')
         tk.Label(win0, text='  故障码： ').pack(side='left')
         # lst3 = ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=error_code).pack(side='left')
 
-        alarm_code = tk.StringVar(self.root, '0')
+        alarm_code = tk.StringVar(root, '0')
         tk.Label(win0, text='  警告码： ').pack(side='left')
         # lst4 = ttk.Combobox(win0, values=getValueList(), textvariable=code5, width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=alarm_code).pack(side='left')
 
-        power_mode = tk.StringVar(self.root, '0')
+        power_mode = tk.StringVar(root, '0')
         tk.Label(win0, text='  限功率模式字： ').pack(side='left')
         # lst4 = ttk.Combobox(win0, values=getValueList(), textvariable=code5, width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=power_mode).pack(side='left')
 
-        stop_mode = tk.StringVar(self.root, '0')
+        stop_mode = tk.StringVar(root, '0')
         tk.Label(win0, text='  停机模式字： ').pack(side='left')
         # lst4 = ttk.Combobox(win0, values=getValueList(), textvariable=code5, width='6').pack(side='left')
         tk.Entry(win0, width='6', textvariable=stop_mode).pack(side='left')
 
-        self.times = tk.StringVar(self.root, '1')
+        self.times = tk.StringVar(root, '1')
         tk.Label(win1, text='  组播循环次数： ').pack(side='left')
         ttk.Combobox(win1, values=[1, 5, 10, 20, 30, 40], textvariable=self.times, width='4').pack(side='left')
         # tk.Entry(win2, width='4', textvariable=self.times).pack(side='left')
 
-        self.sleepTime = tk.StringVar(self.root, '1')
+        self.sleepTime = tk.StringVar(root, '1')
         tk.Label(win1, text='  单条组播间隔(s)： ').pack(side='left')
         tk.Entry(win1, width='4', textvariable=self.sleepTime).pack(side='left')
 
-        self.is_sendtcp = IntVar(self.root, 0)  # 1-select,0-unselect
+        self.is_sendtcp = IntVar(root, 0)  # 1-select,0-unselect
         tk.Checkbutton(win1, text='组播时发送对应tcp请求(仅一次)', variable=self.is_sendtcp).pack(side='left')
 
         self.bt1 = tk.Button(win0, text='单风机数据发送', padx=8, command=lambda: self.send_one(
@@ -153,7 +166,30 @@ class Application:
         self.bt3 = tk.Button(win2, text='Stop', padx=8, command=self.stopSend)
         self.bt3.pack(side='left')
         self.bt4 = tk.Button(win2, text='Clear', padx=8, command=self.clearText)
-        self.bt4.pack(side='right')
+        self.bt4.pack(side='left')
+
+    def create_tcp_server_for_gw750(self, root):
+        server_frame = tk.Frame(root, border=4)
+        server_frame.pack(side='top', anchor='w')
+
+        server_ip = tk.StringVar(root, '0.0.0.0')
+        tk.Label(server_frame, text='  服务ip： ').pack(side='left')
+        ttk.Combobox(server_frame, textvariable=server_ip, values=get_ipList(), width='14').pack(side='left')
+
+        port = tk.IntVar(root, 9999)
+        tk.Label(server_frame, text='  端口： ').pack(side='left')
+        # ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
+        tk.Entry(server_frame, width='6', textvariable=port).pack(side='left')
+        button_start_server = tk.Button(server_frame, text='start', padx=8,
+                                        command=lambda: TcpServer750(server_ip.get(), port.get()).start())
+        button_start_server.pack(side='left')
+
+        button_check_server = tk.Button(server_frame, text='check server', padx=8,
+                                        command=lambda: self.getServerState(root,server_state,server_ip.get(), port.get()))
+        button_check_server.pack(side='left')
+
+        server_state=tk.Label(server_frame)
+        server_state.pack(side='left')
 
     def send_from_xlsx(self, num, sleepTime):
         self.set_bt_disabled()
@@ -197,7 +233,7 @@ class Application:
         msgs = generate_message2(dataDict, seatDict, wmanModDict)
         try:
             self.set_bt_disabled()
-            self.stopflag =0
+            self.stopflag = 0
             for i in range(int(num)):
                 if self.stopflag == 1:
                     break
@@ -271,6 +307,13 @@ class Application:
     def clearText(self):
         self.txt0.delete(0.0, END)
 
+    def getServerState(self,root,label,server_ip,port):
+        res='No run'
+        if isServerStart(server_ip,port):
+            res='Running..'
+        label['text']=res
+        root.update()
+
 
 def messages_from_xlsx2(xlsx):
     xlsx.loadxlsx()
@@ -335,8 +378,12 @@ def generate_message2(datadict, seatDict, wmanModDict):
 
 def do_with_thread(func):
     t1 = threading.Thread(target=func)
-    t1.setDaemon(True)
+    t1.setDaemon(False)
     t1.start()
+
+
+# def get_tcpserver_for_gw750(host, port):
+#     return TcpServer750(host, port)
 
 
 # def getValueList(xlsx):

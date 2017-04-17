@@ -22,7 +22,7 @@ class Excel:
                 for cell in columnsObj[i]:
                     # print(cell.value)
                     if cell.value is None:
-                        cell.value = ''
+                        break
                     column_value.append(cell.value)
                 del (column_value[0])
                 all_value[pid] = column_value
@@ -77,6 +77,24 @@ class Excel:
                 all_value[pid] = row_value
             return all_value
 
+    def get_Package_data_from_sheet(self, sheet_name="750packages"):
+        ws = self.wb.get_sheet_by_name(sheet_name)
+        columnsObj = tuple(ws.columns)
+        all_value = {}
+        if len(columnsObj) > 0:
+            for i in range(0, len(columnsObj)):
+                column_value = []
+                # package_name = columnsObj[i][0].value
+                for cell in columnsObj[i]:
+                    # print(cell.value)
+                    if cell.value is None:
+                        break
+                    column_value.append(str(cell.value))
+                package_name=column_value[0]+'|'+column_value[1]
+                del (column_value[0:2])
+                all_value[package_name] = column_value
+        return all_value
+
 
 # cells2=tuple(ws.columns)
 # print(len(cells2))
@@ -87,4 +105,4 @@ class Excel:
 # if __name__ == '__main__':
 #     e = Excel('information.xlsx')
 #     e.loadxlsx()
-#     print(e.get_datalist_from_sheet2())
+#     print(e.get_Package_data_from_sheet("750packages"))
