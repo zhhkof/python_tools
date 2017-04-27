@@ -59,19 +59,22 @@ def tcp_send(HOST, PORT, data):
 def get_ipList():
     try:
         iplist = gethostbyname_ex(gethostname())[2]
-        iplist.reverse()
+        if len(iplist)>0:
+            iplist.reverse()
+        else:
+            iplist.append('0.0.0.0')
         return iplist
     except Exception as e:
         print(e)
-        return []
+        return ['0.0.0.0']
 
 
 def isServerStart(ip, port):
     s = socket(AF_INET, SOCK_STREAM)
     try:
         if s.connect_ex((ip, port)) == 0:
+            s.close()
             return True
-        else:
-            return False
+        return False
     except:
         return False

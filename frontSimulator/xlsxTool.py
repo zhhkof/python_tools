@@ -21,7 +21,9 @@ class Excel:
                 pid = columnsObj[i][0].value
                 for cell in columnsObj[i]:
                     # print(cell.value)
-                    if cell.value is None:
+                    if cell.value == 'None':
+                        cell.value = ''
+                    elif cell.value is None:
                         break
                     column_value.append(cell.value)
                 del (column_value[0])
@@ -90,11 +92,10 @@ class Excel:
                     if cell.value is None:
                         break
                     column_value.append(str(cell.value))
-                package_name=column_value[0]+'|'+column_value[1]
+                package_name = column_value[0] + '|' + column_value[1]
                 del (column_value[0:2])
                 all_value[package_name] = column_value
         return all_value
-
 
 # cells2=tuple(ws.columns)
 # print(len(cells2))

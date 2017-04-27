@@ -26,11 +26,12 @@ class Application:
         tab_frame2 = tk.Frame(note_book)
         note_book.add(tab_frame2, text='GW750前置模拟', padding=1)
 
-        self.create_front_mc_simulator(tab_frame1)
-        self.create_tcp_server_for_gw750(tab_frame2)
-
         self.stopflag = 0
         self.xlsx = Excel()
+        self.ip_list = get_ipList()
+
+        self.create_front_mc_simulator(tab_frame1)
+        self.create_tcp_server_for_gw750(tab_frame2)
 
     def create_front_mc_simulator(self, root):
         winTs = tk.Frame(root, border=4)
@@ -68,9 +69,9 @@ class Application:
         tk.Label(winMC, text='  组播端口： ').pack(side='left')
         tk.Entry(winMC, width='8', textvariable=self.mcport).pack(side='left')
 
-        self.sendip = tk.StringVar(root, '0.0.0.0')
+        self.sendip = tk.StringVar(root, self.ip_list[0])
         tk.Label(winMC, text='  本机IP： ').pack(side='left')
-        ttk.Combobox(winMC, textvariable=self.sendip, values=get_ipList(), width='14').pack(side='left')
+        ttk.Combobox(winMC, textvariable=self.sendip, values=self.ip_list, width='14').pack(side='left')
         # tk.Entry(winMC, width='14', textvariable=self.sendip).pack(side='left')
 
         self.sendport = tk.IntVar(root, 1501)
@@ -159,8 +160,9 @@ class Application:
         # tk.Label(win1, text='-----------------------' * 6).pack(side='left')
 
         self.bt2 = tk.Button(win2, text='批量Excel数据发送', padx=8,
-                             command=lambda: do_with_thread(
-                                 self.send_from_xlsx(self.times.get(), self.sleepTime.get())))
+                             command=lambda: do_with_thread(lambda:
+                                                            self.send_from_xlsx(self.times.get(),
+                                                                                self.sleepTime.get())))
         self.bt2.pack(side='left')
 
         self.bt3 = tk.Button(win2, text='Stop', padx=8, command=self.stopSend)
@@ -172,23 +174,26 @@ class Application:
         server_frame = tk.Frame(root, border=4)
         server_frame.pack(side='top', anchor='w')
 
-        server_ip = tk.StringVar(root, get_ipList()[0])
+        server_ip = tk.StringVar(root, self.ip_list[0])
         tk.Label(server_frame, text='  服务ip： ').pack(side='left')
-        ttk.Combobox(server_frame, textvariable=server_ip, values=get_ipList(), width='14').pack(side='left')
+        ttk.Combobox(server_frame, textvariable=server_ip, values=self.ip_list, width='14').pack(side='left')
 
         port = tk.IntVar(root, 8801)
         tk.Label(server_frame, text='  端口： ').pack(side='left')
         # ttk.Combobox(win0, values=getValueList(), width='6').pack(side='left')
         tk.Entry(server_frame, width='6', textvariable=port).pack(side='left')
+        # button_start_server = tk.Button(server_frame, text='start', padx=8,
+        #                                 command=lambda: TcpServer750(server_ip.get(), port.get()).start())
         button_start_server = tk.Button(server_frame, text='start', padx=8,
-                                        command=lambda: TcpServer750(server_ip.get(), port.get()).start())
+                                        command=lambda: do_with_thread(TcpServer750(server_ip.get(), port.get()).run))
         button_start_server.pack(side='left')
 
         button_check_server = tk.Button(server_frame, text='check server', padx=8,
-                                        command=lambda: self.getServerState(root,server_state,server_ip.get(), port.get()))
+                                        command=lambda: self.getServerState(root, server_state, server_ip.get(),
+                                                                            port.get()))
         button_check_server.pack(side='left')
 
-        server_state=tk.Label(server_frame)
+        server_state = tk.Label(server_frame)
         server_state.pack(side='left')
 
     def send_from_xlsx(self, num, sleepTime):
@@ -307,11 +312,11 @@ class Application:
     def clearText(self):
         self.txt0.delete(0.0, END)
 
-    def getServerState(self,root,label,server_ip,port):
-        res='No run'
-        if isServerStart(server_ip,port):
-            res='Running..'
-        label['text']=res
+    def getServerState(self, root, label, server_ip, port):
+        res = 'No run'
+        if isServerStart(server_ip, port):
+            res = 'Running..'
+        label['text'] = res
         root.update()
 
 
@@ -341,12 +346,14 @@ def generate_message2(datadict, seatDict, wmanModDict):
         msgdict['multicast'].append(comstate)
     else:
         seatNum = seatDict.get(proid)
-        print("ok")
+        # print(seatNum)
         # wmanlist = list(wmanlist1178)
         wmanlist = list(wmanModDict.get(proid))  # 一定要加list(),否则不是新对象，会导致后面循环采用前面的list。
         # print(wmanlist)
         now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
         wmanlist[0] = now_time
+        if proid=='1104':
+            wmanlist[1] = wmanlist[0]
         wmanlist[seatNum[0] - 1] = wtstate
         statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
         msgdict['tcp'].append(statedata)
@@ -391,52 +398,52 @@ def do_with_thread(func):
 #
 #     return args
 
-
-def messages_from_xlsx(xlsx):
-    xlsx.loadxlsx()
-    datalist = xlsx.get_datalist_from_sheet()
-    datalist2 = xlsx.get_datalist_from_sheet2()
-    seatDict = xlsx.get_sNdict_from_sheet()
-    wmanModDict = xlsx.get_wmanModDict_from_sheet()
-    msgs = []
-    for data in datalist:
-        msgs.append(generate_message(data, seatDict, wmanModDict))
-    return msgs
-
-
-def generate_message(data, seatDict, wmanModDict):
-    # xlsx.loadxlsx()
-    msg = []
-    wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word, connect_code = data
-    if connect_code != '0':
-        comstate = "(comstate|%s|%s)" % (wtid, connect_code)
-        msg.append(comstate)
-        return msg
-    seatNum = seatDict.get(proid)
-    # wmanlist = list(wmanlist1178)
-    wmanlist = list(wmanModDict.get(proid))
-    wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-    wmanlist[seatNum[0] - 1] = wtstate
-    statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
-    now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
-
-    if power_mode_word != '0':
-        power_flag = 'true'
-        wmanlist[seatNum[4] - 1] = power_flag
-        wmanlist[seatNum[3] - 1] = power_mode_word
-
-    if stop_mode_word != '0':
-        wmanlist[seatNum[5] - 1] = stop_mode_word
-    if error_code != '0':
-        wmanlist[seatNum[1] - 1] = error_code
-        falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code + now_time))
-        msg.append(falutdata)
-    if alarm_code != '0':
-        wmanlist[seatNum[2] - 1] = alarm_code
-        alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
-        msg.append(alarmdata)
-    msg.append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
-    return msg
+##老方法
+# def messages_from_xlsx(xlsx):
+#     xlsx.loadxlsx()
+#     datalist = xlsx.get_datalist_from_sheet()
+#     datalist2 = xlsx.get_datalist_from_sheet2()
+#     seatDict = xlsx.get_sNdict_from_sheet()
+#     wmanModDict = xlsx.get_wmanModDict_from_sheet()
+#     msgs = []
+#     for data in datalist:
+#         msgs.append(generate_message(data, seatDict, wmanModDict))
+#     return msgs
+#
+#
+# def generate_message(data, seatDict, wmanModDict):
+#     # xlsx.loadxlsx()
+#     msg = []
+#     wtid, proid, wtstate, error_code, alarm_code, power_mode_word, stop_mode_word, connect_code = data
+#     if connect_code != '0':
+#         comstate = "(comstate|%s|%s)" % (wtid, connect_code)
+#         msg.append(comstate)
+#         return msg
+#     seatNum = seatDict.get(proid)
+#     # wmanlist = list(wmanlist1178)
+#     wmanlist = list(wmanModDict.get(proid))
+#     wmanlist[0] = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+#     wmanlist[seatNum[0] - 1] = wtstate
+#     statedata = '(statedata|%s|%s)' % (wtid, wtstate)  # not here, for tcp
+#     now_time = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')[:-3]
+#
+#     if power_mode_word != '0':
+#         power_flag = 'true'
+#         wmanlist[seatNum[4] - 1] = power_flag
+#         wmanlist[seatNum[3] - 1] = power_mode_word
+#
+#     if stop_mode_word != '0':
+#         wmanlist[seatNum[5] - 1] = stop_mode_word
+#     if error_code != '0':
+#         wmanlist[seatNum[1] - 1] = error_code
+#         falutdata = '(falutdata|%s|%s| |2|%s)' % (wtid, error_code, generate_unique_code(wtid + error_code + now_time))
+#         msg.append(falutdata)
+#     if alarm_code != '0':
+#         wmanlist[seatNum[2] - 1] = alarm_code
+#         alarmdata = '(alarmdata|%s|%s| |2)' % (wtid, alarm_code)
+#         msg.append(alarmdata)
+#     msg.append('(wman|%s|' % wtid + ','.join(wmanlist) + ')')
+#     return msg
 
 
 def generate_unique_code(text):

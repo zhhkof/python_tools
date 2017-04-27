@@ -33,9 +33,9 @@ class TcpServer750(threading.Thread):
             package_name = request.split('|')[0].split('(')[1]
             wtid = request.split('|')[1]
             reslist = packages[wtid + '|' + package_name]
-            return '((' + ",".join(reslist) + '))'
+            return '(' + ",".join(reslist) + ')'
         else:
-            return request + "[error input]"
+            return request + "***error input***"
 
 
 if __name__ == '__main__':
